@@ -60,6 +60,13 @@
   .tl-item.end::before{border-color:#ff9f43;box-shadow:0 0 12px rgba(255,159,67,.8);}
   .tl-item.seg::before{left:-19px;top:19px;width:8px;height:8px;border-radius:2px;border-color:#f5a623;
     box-shadow:0 0 8px rgba(245,166,35,.6);}
+  /* 午间休整分隔卡 */
+  .tl-item.break{margin:14px 0;}
+  .tl-item.break::before{left:-20px;top:16px;width:12px;height:12px;border-radius:50%;
+    background:#0c1626;border:2.5px dashed #ffb066;box-shadow:0 0 10px rgba(255,176,102,.55);}
+  .break-card{background:linear-gradient(150deg,rgba(38,26,14,.72),rgba(14,18,28,.92));
+    border:1px dashed rgba(255,176,102,.42);}
+  .break-card .name{color:#ffc98a;}
   .card{background:linear-gradient(150deg,rgba(21,38,63,.92),rgba(12,22,40,.92));
         border:1px solid rgba(79,195,247,.16);border-radius:11px;padding:12px 14px;
         transition:border-color .22s,transform .22s;}
@@ -146,7 +153,7 @@
   <div id="panel">
     <div class="p-head">
       <h1>苏州行程演示</h1>
-      <div class="sub">2026-09-16（周三）· 分行 → 万达广场支行 → 姑苏区人民政府 → 分行</div>
+      <div class="sub">2026-09-16（周三）· 上午 分行→黄桥支行→东湖大郡支行 ｜ 下午 分行→姑苏区人民政府</div>
     </div>
     <div class="prog-wrap">
       <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
@@ -160,11 +167,15 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 /* ================= 配置 ================= */
-const DEPART_MIN = 15 * 60 + 11;  // 出发 15:11（2026-09-16 行程）
+const DEPART_MIN = 9 * 60 + 30;   // 上午出发 09:30（2026-09-16 行程）
+const PM_DEPART_MIN = 16 * 60;    // 下午出发 16:00（午间休整后重新起算）
+const BREAK_AFTER_SEG = 3;        // 第4个点(上午返回分行)之后进入午间休整
 const DEFAULT_STAY = 0;           // 默认停留(分钟)
 const STAY_OVERRIDE = {           // 各点位停留时长（分钟）
-  '万达广场支行': 40,             // 网点调研（40分钟）
-  '姑苏区人民政府': 50            // 政府工作会谈（50分钟）
+  '黄桥支行': 30,                 // 网点调研（30分钟）
+  '东湖大郡支行': 30,             // 网点调研（30分钟）
+  '返回分行': 0,
+  '姑苏区人民政府': 40            // 走访会谈（40分钟）
 };
 
 let map, roadLayer, satLayer, routeLayers = [], comet = null;
@@ -291,14 +302,17 @@ fetch('route_data.json').then(r=>r.json()).then(d=>{ROUTE=d;render();})
 function render(){
   const {points,segments,total_distance,total_duration}=ROUTE;
 
-  /* 时间推算 */
+  /* 时间推算（支持午间休整：休整点之后从下午出发时间重新起算） */
   let clock=DEPART_MIN;
   points.forEach((pt,i)=>{
     const stay=STAY_OVERRIDE[pt.name]!=null?STAY_OVERRIDE[pt.name]:DEFAULT_STAY;
     if(i===0){pt._arrive=null;pt._leave=clock;pt._stay=null;}
-    else{const sg=segments[i-1];
+    else{
+      if(i===BREAK_AFTER_SEG+1){clock=PM_DEPART_MIN;pt._afterBreak=true;}
+      const sg=segments[i-1];
       pt._arrive=clock+Math.round((sg?sg.duration:0)/60);
-      pt._leave=pt._arrive+stay;pt._stay=stay;clock=pt._leave;}
+      pt._leave=pt._arrive+stay;pt._stay=stay;clock=pt._leave;
+    }
   });
 
   /* 合并全轨迹 */
@@ -363,6 +377,15 @@ function render(){
       '<span class="tag'+(isEnd?' end':'')+'">'+(i===0?'起点':(isEnd?'终点':'途经'))+'</span>'+
       '<div class="times">'+times+'</div></div>';
     tl.appendChild(d);
+
+    /* 午间休整分隔卡 */
+    if(i===BREAK_AFTER_SEG){
+      const b=document.createElement('div');
+      b.className='tl-item break';
+      b.style.animationDelay=((i+0.4)*0.08)+'s';
+      b.innerHTML='<div class="card break-card"><span class="name">🏢 返回分行 · 午间休整</span>'+'<div class="times">上午调研结束，回分行休整；下午 <b>'+fmtTime(PM_DEPART_MIN)+'</b> 再次出发</div></div>';
+      tl.appendChild(b);
+    }
 
     if(i<segments.length){
       const sg=segments[i];
