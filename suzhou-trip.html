@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>苏州行程动态回放</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%; height:100%; font-family:"Microsoft YaHei","PingFang SC",sans-serif; }
+  #app { display:flex; height:100%; }
+  #mapBox { flex:1; position:relative; min-width:0; }
+  #map { width:100%; height:100%; background:#e8ecef; }
+
+  #toolbar { position:absolute; top:12px; left:12px; z-index:1000; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .btn { padding:8px 14px; border:1px solid #b8d4f0; border-radius:8px; background:#fff;
+         color:#1a56a0; cursor:pointer; font-size:13px; box-shadow:0 2px 6px rgba(30,80,160,.15);
+         user-select:none; font-family:inherit; }
+  .btn:hover { background:#eef5ff; }
+  .btn.active { background:#1a56a0; color:#fff; }
+
+  #panel { width:350px; background:#f7fafd; border-left:1px solid #e0e8f2;
+           overflow-y:auto; padding:16px; flex-shrink:0; }
+  #panel h1 { font-size:17px; color:#17335c; margin-bottom:4px; }
+  #panel .sub { font-size:12px; color:#7a8ba3; margin-bottom:14px; }
+  .timeline { position:relative; padding-left:18px; }
+  .timeline::before { content:""; position:absolute; left:5px; top:6px; bottom:6px; width:2px;
+                      background:linear-gradient(#4a90e2,#b8d4f0); }
+  .tl-item { position:relative; margin-bottom:12px; }
+  .tl-item::before { content:""; position:absolute; left:-17px; top:8px; width:10px; height:10px;
+                     border-radius:50%; background:#fff; border:3px solid #1a56a0; }
+  .tl-item.seg::before { border-color:#f5a623; border-radius:2px; }
+  .card { background:#fff; border:1px solid #e3ecf7; border-radius:10px; padding:10px 12px;
+          box-shadow:0 1px 4px rgba(30,80,160,.06); }
+  .card .name { font-size:14px; font-weight:600; color:#17335c; }
+  .card .tag { display:inline-block; font-size:11px; padding:1px 8px; margin-left:6px;
+               border-radius:10px; background:#e8f1fd; color:#1a56a0; vertical-align:1px; }
+  .card .tag.end { background:#fdeee2; color:#c96a10; }
+  .times { font-size:12px; color:#4a5c74; margin-top:6px; line-height:1.7; }
+  .times b { color:#17335c; font-weight:600; }
+  .seg-card { background:linear-gradient(135deg,#fffdf8,#fff); }
+  .seg-card .route-name { font-size:12px; color:#68788d; margin-top:4px; line-height:1.5; }
+  .stat-line { font-size:12px; color:#c96a10; margin-top:6px; font-weight:600; }
+  .loading { padding:12px; font-size:13px; color:#7a8ba3; }
+  .error { padding:12px; font-size:13px; color:#c0392b; }
+
+  #toast { position:fixed; left:50%; bottom:48px; transform:translateX(-50%);
+           background:rgba(23,51,92,.92); color:#fff; padding:10px 22px; border-radius:20px;
+           font-size:13px; opacity:0; pointer-events:none; transition:opacity .25s; z-index:9999; }
+  #toast.show { opacity:1; }
+
+  .pt-marker { width:26px; height:26px; border-radius:50%; background:#1a56a0; color:#fff;
+               font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center;
+               border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,.35); }
+  .pt-marker.end { background:#e67e22; }
+  .flow-dot { width:14px; height:14px; border-radius:50%;
+              background:radial-gradient(circle at 35% 35%,#fff,#4fc3f7 55%,#1a56a0);
+              box-shadow:0 0 12px 4px rgba(79,195,247,.85); }
+  @media (max-width:820px){ #app{flex-direction:column;} #panel{width:100%; height:45%; border-left:none; border-top:1px solid #e0e8f2;} }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="mapBox">
+    <div id="map"></div>
+    <div id="toolbar">
+      <button class="btn active" id="btnRoad" onclick="setBase('road')">路网图</button>
+      <button class="btn" id="btnSat" onclick="setBase('sat')">卫星图</button>
+      <button class="btn" id="btnReplay" onclick="toggleReplay()">▶ 回放</button>
+      <button class="btn" onclick="copyLink()">📋 复制链接</button>
+    </div>
+  </div>
+  <div id="panel">
+    <h1>苏州行程回放</h1>
+    <div class="sub">真实导航路线 · 时间轴 · 动态流光</div>
+    <div class="timeline" id="timeline"><div class="loading">正在加载路线数据…</div></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ================= 配置 ================= */
+const DEPART_MIN = 9 * 60;      // 出发时刻 09:00
+const DEFAULT_STAY = 30;        // 默认停留(分钟)，可在每点单独覆盖
+// 停留时长可自定义：{ name, lnglat, stay: 45 }
+const STAY_OVERRIDE = {};
+
+let map, roadLayer, satLayer, routeLayers = [], flowMarker = null;
+let ROUTE = null, replayTimer = null, replayOn = false;
+
+/* ================= 地图初始化 ================= */
+map = L.map('map', { zoomControl: true, attributionControl: true }).setView([31.321, 31.321], 13);
+map.setView([31.3220, 120.7255], 13);
+
+const TILE_ROAD = 'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}';
+const TILE_SAT  = 'https://webst0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}';
+const TILE_LABEL= 'https://webst0{s}.is.autonavi.com/appmaptile?style=8&ltype=11&x={x}&y={y}&z={z}';
+
+roadLayer = L.tileLayer(TILE_ROAD, { subdomains:['1','2','3','4'], maxZoom:18, attribution:'© 高德地图' });
+roadLayer.addTo(map);
+
+function setBase(mode) {
+  document.getElementById('btnRoad').classList.toggle('active', mode === 'road');
+  document.getElementById('btnSat').classList.toggle('active', mode === 'sat');
+  if (mode === 'sat') {
+    if (roadLayer) map.removeLayer(roadLayer);
+    if (!satLayer) { satLayer = L.layerGroup([
+        L.tileLayer(TILE_SAT, { subdomains:['1','2','3','4'], maxZoom:18 }),
+        L.tileLayer(TILE_LABEL, { subdomains:['1','2','3','4'], maxZoom:18 })
+      ]); }
+    satLayer.addTo(map);
+  } else {
+    if (satLayer) map.removeLayer(satLayer);
+    if (roadLayer) roadLayer.addTo(map);
+  }
+}
+
+/* ================= 工具 ================= */
+function fmtTime(min){ const h=Math.floor(min/60)%24, m=min%60; return (h<10?'0'+h:h)+':'+(m<10?'0'+m:m); }
+function fmtDur(sec){ const m=Math.round(sec/60); return m>=60? Math.floor(m/60)+'小时'+(m%60?(m%60)+'分':'') : m+'分钟'; }
+function fmtDist(m){ return (m/1000).toFixed(1)+'公里'; }
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2200); }
+
+function copyLink(){
+  const url = location.href;
+  const done = ()=>toast('✅ 链接已复制，可直接分享');
+  const fb = ()=>{ const ta=document.createElement('textarea'); ta.value=url;
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); done(); } catch(e){ toast('复制失败，请手动复制'); }
+    ta.remove(); };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(url).then(done, fb);
+  else fb();
+}
+
+/* ================= 加载路线数据 ================= */
+fetch('route_data.json').then(r=>r.json()).then(data=>{ ROUTE = data; render(); })
+  .catch(e=>{ document.getElementById('timeline').innerHTML =
+    '<div class="error">路线数据加载失败：'+e.message+'<br>请确认 route_data.json 与页面同目录。</div>'; });
+
+function render(){
+  const { points, segments, total_distance, total_duration } = ROUTE;
+
+  /* --- 时间推算 --- */
+  let clock = DEPART_MIN;
+  points.forEach((pt,i)=>{
+    const stay = STAY_OVERRIDE[pt.name] != null ? STAY_OVERRIDE[pt.name] : DEFAULT_STAY;
+    if (i===0){ pt._arrive=null; pt._leave=clock; pt._stay=null; }
+    else {
+      const seg = segments[i-1];
+      pt._arrive = clock + Math.round((seg ? seg.duration : 0)/60);
+      pt._leave = pt._arrive + stay;
+      pt._stay = stay;
+      clock = pt._leave;
+    }
+  });
+
+  /* --- 绘制路线 --- */
+  routeLayers.forEach(l=>map.removeLayer(l)); routeLayers = [];
+  segments.forEach(seg=>{
+    const latlngs = seg.polyline.map(p=>[p[1], p[0]]);
+    const base = L.polyline(latlngs, { color:'#1a56a0', weight:9, opacity:.22, lineJoin:'round', lineCap:'round' });
+    const dash = L.polyline(latlngs, { color:'#4fc3f7', weight:4.5, opacity:.95, lineJoin:'round', lineCap:'round',
+                                       dashArray:'14 12', className:'flow-line' });
+    base.addTo(map); dash.addTo(map);
+    routeLayers.push(base, dash);
+  });
+
+  /* --- 途经点标记 --- */
+  points.forEach((pt,i)=>{
+    const isEnd = i === points.length-1;
+    const icon = L.divIcon({ className:'', html:'<div class="pt-marker'+(isEnd?' end':'')+'">'+(i+1)+'</div>',
+                             iconSize:[26,26], iconAnchor:[13,13] });
+    const mk = L.marker([pt.lnglat[1], pt.lnglat[0]], { icon }).addTo(map)
+      .bindTooltip((i+1)+'. '+pt.name, { direction:'top', offset:[0,-14] });
+    routeLayers.push(mk);
+  });
+
+  /* --- 视野自适应 --- */
+  const all = [];
+  segments.forEach(s=>s.polyline.forEach(p=>all.push([p[1],p[0]])));
+  if (all.length) map.fitBounds(L.latLngBounds(all), { padding:[60,60] });
+
+  /* --- 流光点动画 --- */
+  const full = [];
+  segments.forEach(s=>s.polyline.forEach(p=>full.push([p[1],p[0]])));
+  if (flowMarker) map.removeLayer(flowMarker);
+  const dotIcon = L.divIcon({ className:'', html:'<div class="flow-dot"></div>', iconSize:[14,14], iconAnchor:[7,7] });
+  flowMarker = L.marker(full[0] || [31.32,120.72], { icon:dotIcon, zIndexOffset:1000 }).addTo(map);
+  let idx = 0;
+  if (replayTimer) clearInterval(replayTimer);
+  replayTimer = setInterval(()=>{
+    if (!full.length) return;
+    idx = (idx + 1) % full.length;
+    flowMarker.setLatLng(full[idx]);
+    if (idx === 0) { /* 循环 */ }
+  }, 120);
+
+  /* --- 时间轴面板 --- */
+  const tl = document.getElementById('timeline');
+  tl.innerHTML = '';
+  points.forEach((pt,i)=>{
+    const isEnd = i === points.length-1;
+    let times = '';
+    if (i===0) times = '🕘 出发：<b>'+fmtTime(pt._leave)+'</b>';
+    else {
+      times = '🕓 到达：<b>'+fmtTime(pt._arrive)+'</b>　🕕 离开：<b>'+fmtTime(pt._leave)+'</b>';
+      if (pt._stay) times += '<br>⏸ 停留：<b>'+pt._stay+' 分钟</b>';
+    }
+    const card = document.createElement('div');
+    card.className = 'tl-item';
+    card.innerHTML = '<div class="card"><span class="name">'+(i+1)+' '+pt.name+'</span>'+
+      '<span class="tag'+(isEnd?' end':'')+'">'+(i===0?'起点':(isEnd?'终点':'途经'))+'</span>'+
+      '<div class="times">'+times+'</div></div>';
+    tl.appendChild(card);
+
+    if (i < segments.length){
+      const seg = segments[i];
+      const roads = seg.steps.filter(s=>s.road).map(s=>s.road).filter((v,j,a)=>a.indexOf(v)===j).slice(0,3).join(' → ');
+      const el = document.createElement('div');
+      el.className = 'tl-item seg';
+      el.innerHTML = '<div class="card seg-card"><span class="name">🚗 行驶段 '+(i+1)+'</span>'+
+        (roads ? '<div class="route-name">'+roads+'</div>' : '')+
+        '<div class="stat-line">⏱ 行车 '+fmtDur(seg.duration)+'　·　📏 '+fmtDist(seg.distance)+'</div></div>';
+      tl.appendChild(el);
+    }
+  });
+  const sum = document.createElement('div');
+  sum.className = 'tl-item';
+  sum.innerHTML = '<div class="card"><span class="name">🧾 全程合计</span>'+
+    '<div class="stat-line">⏱ '+fmtDur(total_duration)+'　·　📏 '+fmtDist(total_distance)+
+    '</div><div class="times" style="color:#7a8ba3">含停留共 '+fmtTime(clock - DEPART_MIN)+' 小时</div></div>';
+  tl.appendChild(sum);
+}
+
+/* ================= 回放控制 ================= */
+function toggleReplay(){
+  replayOn = !replayOn;
+  document.getElementById('btnReplay').classList.toggle('active', replayOn);
+  document.getElementById('btnReplay').textContent = replayOn ? '⏸ 暂停' : '▶ 回放';
+}
+</script>
+</body>
+</html>
