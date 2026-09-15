@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>苏州行程动态回放</title>
+<title>苏州行程计划</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -134,7 +134,7 @@
     <div id="toolbar">
       <button class="btn active" id="btnRoad" onclick="setBase('road')">路网图</button>
       <button class="btn" id="btnSat" onclick="setBase('sat')">卫星图</button>
-      <button class="btn active" id="btnReplay" onclick="toggleReplay()">⏸ 回放中</button>
+      <button class="btn active" id="btnReplay" onclick="toggleReplay()">⏸ 播放中</button>
       <button class="btn" onclick="copyLink()">📋 复制链接</button>
     </div>
     <div id="legend">
@@ -145,7 +145,7 @@
   </div>
   <div id="panel">
     <div class="p-head">
-      <h1>苏州行程回放</h1>
+      <h1>苏州行程计划</h1>
       <div class="sub">真实导航路线 · 时间轴 · 流光轨迹</div>
     </div>
     <div class="prog-wrap">
@@ -433,7 +433,7 @@ function updateHUD(){
 function toggleReplay(){
   paused=!paused;
   const b=document.getElementById('btnReplay');
-  b.textContent=paused?'▶ 继续':'⏸ 回放中';
+  b.textContent=paused?'▶ 继续':'⏸ 播放中';
   b.classList.toggle('active',!paused);
   if(!paused){t0=performance.now()-progress/SPEED;}
 }
