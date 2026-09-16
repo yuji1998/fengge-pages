@@ -90,6 +90,17 @@
 .nav-btn.baidu:hover{background:linear-gradient(140deg,rgba(255,159,67,.4),rgba(230,126,34,.5));
     box-shadow:0 4px 14px rgba(255,159,67,.3);color:#fff;}
 .nav-addr{font-size:11.5px;color:#7f97b5;margin-top:5px;line-height:1.5;}
+  /* 微信环境提示条 */
+  #wxTip{display:none;position:absolute;top:0;left:0;right:0;z-index:2000;
+    padding:9px 14px;font-size:12.5px;line-height:1.5;
+    background:linear-gradient(90deg,#c9a227,#e0b93a);color:#2b1f00;font-weight:600;
+    box-shadow:0 2px 10px rgba(0,0,0,.35);}
+  #wxTip b{color:#7a1f00;}
+  /* 复制地址按钮 */
+  .nav-btn.copy{border-color:rgba(126,222,155,.5);color:#b6f0c8;
+    background:linear-gradient(140deg,rgba(76,175,80,.2),rgba(56,142,60,.26));}
+  .nav-btn.copy:hover{background:linear-gradient(140deg,rgba(76,175,80,.42),rgba(56,142,60,.5));
+    box-shadow:0 4px 14px rgba(76,175,80,.3);color:#fff;}
   .times{font-size:12px;color:#8ba8c4;margin-top:7px;line-height:1.85;}
   .times b{color:#4fc3f7;font-weight:600;font-variant-numeric:tabular-nums;}
   .seg-card{background:linear-gradient(150deg,rgba(28,22,14,.7),rgba(14,18,28,.92));}
@@ -243,22 +254,42 @@ function navUrl(kind, pt){
   const nm=navDest(pt);
   const addr=pt.addr||'';
   if(kind==='amap'){
-    /* 高德 URI：to=lng,lat,名称（坐标用 GCJ-02）*/
+    /* 高德 URI：to=lng,lat,名称（坐标用 GCJ-02）—— 实测浏览器可直接唤起 */
     return 'https://uri.amap.com/navigation?to='+gcjLng+','+gcjLat+','+encodeURIComponent(nm)+
            '&mode=car&policy=1&src=fengge&coordinate=gaode&callnative=1';
   }
-  if(kind==='amapweb'){
-    /* 高德网页版导航（不装App也能看）*/
-    return 'https://uri.amap.com/navigation?to='+gcjLng+','+gcjLat+','+encodeURIComponent(nm)+
-           '&mode=car&policy=1&src=fengge&coordinate=gaode';
-  }
   if(kind==='baidu'){
-    /* 百度 direction：destination=latlng:lat,lng|name:名称（坐标必须 BD-09）*/
+    /* 百度官方 scheme：坐标必须 BD-09，origin 留空=当前位置 */
+    return 'baidumap://map/direction?origin=&destination=latlng:'+bd[1]+','+bd[0]+
+           '|name:'+encodeURIComponent(addr?nm+'('+addr+')':nm)+
+           '&mode=driving&coord_type=bd09ll&src=webapp.fengge.default';
+  }
+  if(kind==='baiduweb'){
+    /* 百度 H5 兜底页 */
     return 'https://api.map.baidu.com/direction?destination=latlng:'+bd[1]+','+bd[0]+
            '|name:'+encodeURIComponent(addr?nm+'('+addr+')':nm)+
-           '&mode=driving&region=苏州&output=html&src=fengge&ak='+BAIDU_AK;
+           '&mode=driving&region='+encodeURIComponent('苏州')+'&output=html&src=fengge&ak='+BAIDU_AK;
   }
   return '#';
+}
+/* 唤起地图 App：先 iframe（安卓主流做法），1.5s 后兜底跳 H5/商店 */
+function openNav(kind, pt){
+  const url=navUrl(kind, pt);
+  if(kind==='amap'){
+    /* 高德 https URI 直接整窗跳转最稳 */
+    window.location.href=url;
+    return;
+  }
+  /* 百度：用 iframe 唤起，失败则跳 H5 */
+  const ifr=document.createElement('iframe');
+  ifr.style.cssText='display:none;width:0;height:0;border:0';
+  ifr.src=url;
+  document.body.appendChild(ifr);
+  setTimeout(()=>{
+    try{document.body.removeChild(ifr);}catch(e){}
+    /* 页面仍在 → 多半没唤起，跳百度 H5 网页版兜底 */
+    if(!document.hidden)window.location.href=navUrl('baiduweb', pt);
+  }, 1600);
 }
 function fmtTime(min){const h=Math.floor(min/60)%24,m=Math.round(min%60);return (h<10?'0'+h:h)+':'+(m<10?'0'+m:m);}
 function fmtDur(sec){const m=Math.round(sec/60);return m>=60?(Math.floor(m/60)+'小时'+(m%60?(m%60)+'分':'')):m+'分钟';}
@@ -353,6 +384,7 @@ fetch('route_data.json').then(r=>r.json()).then(d=>{ROUTE=d;render();})
 
 function render(){
   const {points,segments,total_distance,total_duration}=ROUTE;
+  window.POINTS_REF=points;   /* 供一键导航按钮取点位 */
 
   /* 时间推算（支持午间休整：休整点之后从下午出发时间重新起算） */
   let clock=DEPART_MIN;
@@ -401,10 +433,10 @@ function render(){
         (pt.full_name?'<br><span style="color:#333;font-size:12.5px">'+pt.full_name+'</span>':'')+
         (pt.addr?'<br><span style="color:#888;font-size:12px">'+pt.addr+'</span>':'')+
         '<div style="margin-top:8px">'+
-        '<a href="'+navUrl('amap',pt)+'" target="_blank" rel="noopener" '+
+        '<a href="javascript:void(0)" onclick="openNav(\'amap\',POINTS_REF['+i+'])" '+
           'style="display:inline-block;margin-right:6px;padding:4px 10px;border-radius:6px;'+
           'background:#1976d2;color:#fff;text-decoration:none;font-size:12.5px">高德导航</a>'+
-        '<a href="'+navUrl('baidu',pt)+'" target="_blank" rel="noopener" '+
+        '<a href="javascript:void(0)" onclick="openNav(\'baidu\',POINTS_REF['+i+'])" '+
           'style="display:inline-block;padding:4px 10px;border-radius:6px;'+
           'background:#e67e22;color:#fff;text-decoration:none;font-size:12.5px">百度导航</a></div>')
       .bindTooltip((i+1)+'. '+pt.name,{direction:'top',offset:[0,-16]}));
@@ -437,10 +469,12 @@ function render(){
     d.style.animationDelay=(i*0.08)+'s';
     /* 一键导航按钮（目的地用官方全名 + 完整地址） */
     let navBtns='<div class="nav-actions">'+
-      '<a class="nav-btn amap" href="'+navUrl('amap',pt)+'" target="_blank" rel="noopener" '+
+      '<a class="nav-btn amap" href="javascript:void(0)" onclick="openNav(\'amap\',POINTS_REF['+i+'])" '+
         'title="用高德地图导航到该点">🧭 高德导航</a>'+
-      '<a class="nav-btn baidu" href="'+navUrl('baidu',pt)+'" target="_blank" rel="noopener" '+
+      '<a class="nav-btn baidu" href="javascript:void(0)" onclick="openNav(\'baidu\',POINTS_REF['+i+'])" '+
         'title="用百度地图导航到该点">🧭 百度导航</a>'+
+      '<a class="nav-btn copy" href="javascript:void(0)" onclick="copyAddr('+i+')" '+
+        'title="复制名称+地址，可黏到任意地图App">📋 复制地址</a>'+
       '</div>';
     if(pt.addr)navBtns+='<div class="nav-addr">📍 '+navDest(pt)+' · '+pt.addr+'</div>';
     d.innerHTML='<div class="card"><span class="name">'+(i+1)+'. '+pt.name+'</span>'+
@@ -532,6 +566,38 @@ function toggleReplay(){
   b.textContent=paused?'▶ 继续':'⏸ 播放中';
   b.classList.toggle('active',!paused);
   if(!paused){t0=performance.now()-progress/SPEED;}
+}
+</script>
+
+<script>
+/* ===== 微信环境提示 ===== */
+(function(){
+  if(!/MicroMessenger/i.test(navigator.userAgent))return;
+  var d=document.createElement('div');
+  d.id='wxTip';
+  d.innerHTML='⚠️ 微信内无法唤起地图 App —— 请点右上角 <b>「⋯」→「在浏览器打开」</b>，'
+            +'或用下方 <b>复制地址</b> 按钮黏到地图 App 里搜';
+  document.body.appendChild(d);
+  d.style.display='block';
+  /* 给工具栏让位 */
+  var tb=document.getElementById('toolbar');
+  if(tb)tb.style.top='58px';
+})();
+/* ===== 复制地址（微信里 100% 可用） ===== */
+function copyAddr(i){
+  var pt=(window.POINTS_REF||[])[i];
+  if(!pt){toast('地址读取失败');return;}
+  var txt=navDest(pt)+(pt.addr?' '+pt.addr:'');
+  var done=function(){toast('✅ 已复制：'+txt);};
+  var fb=function(){
+    var ta=document.createElement('textarea');
+    ta.value=txt;ta.style.cssText='position:fixed;left:-9999px';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');done();}catch(e){toast('复制失败，请手动复制');}
+    ta.remove();
+  };
+  if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(txt).then(done,fb);
+  else fb();
 }
 </script>
 </body>
