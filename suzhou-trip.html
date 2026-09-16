@@ -96,11 +96,8 @@
     background:linear-gradient(90deg,#c9a227,#e0b93a);color:#2b1f00;font-weight:600;
     box-shadow:0 2px 10px rgba(0,0,0,.35);}
   #wxTip b{color:#7a1f00;}
-  /* 复制地址按钮 */
-  .nav-btn.copy{border-color:rgba(126,222,155,.5);color:#b6f0c8;
-    background:linear-gradient(140deg,rgba(76,175,80,.2),rgba(56,142,60,.26));}
-  .nav-btn.copy:hover{background:linear-gradient(140deg,rgba(76,175,80,.42),rgba(56,142,60,.5));
-    box-shadow:0 4px 14px rgba(76,175,80,.3);color:#fff;}
+  /* 百度导航按钮（复制地址 + 唤起百度地图二合一） */
+  .nav-btn.baidu{font-weight:700;}
   .times{font-size:12px;color:#8ba8c4;margin-top:7px;line-height:1.85;}
   .times b{color:#4fc3f7;font-weight:600;font-variant-numeric:tabular-nums;}
   .seg-card{background:linear-gradient(150deg,rgba(28,22,14,.7),rgba(14,18,28,.92));}
@@ -436,7 +433,7 @@ function render(){
         '<a href="javascript:void(0)" onclick="openNav(\'amap\',POINTS_REF['+i+'])" '+
           'style="display:inline-block;margin-right:6px;padding:4px 10px;border-radius:6px;'+
           'background:#1976d2;color:#fff;text-decoration:none;font-size:12.5px">高德导航</a>'+
-        '<a href="javascript:void(0)" onclick="openNav(\'baidu\',POINTS_REF['+i+'])" '+
+        '<a href="javascript:void(0)" onclick="baiduNav('+i+')" '+
           'style="display:inline-block;padding:4px 10px;border-radius:6px;'+
           'background:#e67e22;color:#fff;text-decoration:none;font-size:12.5px">百度导航</a></div>')
       .bindTooltip((i+1)+'. '+pt.name,{direction:'top',offset:[0,-16]}));
@@ -471,10 +468,8 @@ function render(){
     let navBtns='<div class="nav-actions">'+
       '<a class="nav-btn amap" href="javascript:void(0)" onclick="openNav(\'amap\',POINTS_REF['+i+'])" '+
         'title="用高德地图导航到该点">🧭 高德导航</a>'+
-      '<a class="nav-btn baidu" href="javascript:void(0)" onclick="openNav(\'baidu\',POINTS_REF['+i+'])" '+
-        'title="用百度地图导航到该点">🧭 百度导航</a>'+
-      '<a class="nav-btn copy" href="javascript:void(0)" onclick="copyAddr('+i+')" '+
-        'title="复制名称+地址，可黏到任意地图App">📋 复制地址</a>'+
+      '<a class="nav-btn baidu" href="javascript:void(0)" onclick="baiduNav('+i+')" '+
+        'title="唤起百度地图并自动填入该地址">🧭 百度导航</a>'+
       '</div>';
     if(pt.addr)navBtns+='<div class="nav-addr">📍 '+navDest(pt)+' · '+pt.addr+'</div>';
     d.innerHTML='<div class="card"><span class="name">'+(i+1)+'. '+pt.name+'</span>'+
@@ -584,20 +579,38 @@ function toggleReplay(){
   if(tb)tb.style.top='58px';
 })();
 /* ===== 复制地址（微信里 100% 可用） ===== */
-function copyAddr(i){
+function baiduNav(i){
   var pt=(window.POINTS_REF||[])[i];
   if(!pt){toast('地址读取失败');return;}
   var txt=navDest(pt)+(pt.addr?' '+pt.addr:'');
-  var done=function(){toast('✅ 已复制：'+txt);};
-  var fb=function(){
-    var ta=document.createElement('textarea');
-    ta.value=txt;ta.style.cssText='position:fixed;left:-9999px';
-    document.body.appendChild(ta);ta.select();
-    try{document.execCommand('copy');done();}catch(e){toast('复制失败，请手动复制');}
-    ta.remove();
-  };
-  if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(txt).then(done,fb);
-  else fb();
+  /* 1) 先把地址写进剪贴板（这样用户切到百度地图后，搜索框粘贴即可） */
+  try{
+    if(navigator.clipboard&&window.isSecureContext){
+      navigator.clipboard.writeText(txt).catch(function(){});
+    }else{
+      var ta=document.createElement('textarea');
+      ta.value=txt;ta.style.cssText='position:fixed;left:-9999px';
+      document.body.appendChild(ta);ta.select();
+      try{document.execCommand('copy');}catch(e){}
+      ta.remove();
+    }
+  }catch(e){}
+  toast('📋 已复制：'+txt);
+
+  /* 2) 唤起百度地图：优先 scheme（带坐标，直接出路线）；
+        1.6s 没跳走 → 退到 H5 页；再不行用户可自己在百度地图里粘贴地址 */
+  var bd=pt.bd09||pt.lnglat;
+  var scheme='baidumap://map/direction?origin=&destination=latlng:'+bd[1]+','+bd[0]+
+             '|name:'+encodeURIComponent(txt)+
+             '&mode=driving&coord_type=bd09ll&src=webapp.fengge.default';
+  var ifr=document.createElement('iframe');
+  ifr.style.cssText='display:none;width:0;height:0;border:0';
+  ifr.src=scheme;
+  document.body.appendChild(ifr);
+  setTimeout(function(){
+    try{document.body.removeChild(ifr);}catch(e){}
+    if(!document.hidden)window.location.href=navUrl('baiduweb', pt);
+  },1600);
 }
 </script>
 </body>
