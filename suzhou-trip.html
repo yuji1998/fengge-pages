@@ -95,12 +95,6 @@
     background:rgba(255,159,67,.07);transition:background .18s,border-color .18s;}
   .nav-addr:hover,.nav-addr:active{background:rgba(255,159,67,.2);border-color:rgba(255,176,102,.85);}
   .nav-addr .addr-go{color:#ffb066;font-weight:700;white-space:nowrap;}
-  /* 微信环境提示条 */
-  #wxTip{display:none;position:absolute;top:0;left:0;right:0;z-index:2000;
-    padding:9px 14px;font-size:12.5px;line-height:1.5;
-    background:linear-gradient(90deg,#c9a227,#e0b93a);color:#2b1f00;font-weight:600;
-    box-shadow:0 2px 10px rgba(0,0,0,.35);}
-  #wxTip b{color:#7a1f00;}
   /* 百度导航按钮（复制地址 + 唤起百度地图，二合一） */
   .nav-btn.baidu{font-weight:700;}
   .times{font-size:12px;color:#8ba8c4;margin-top:7px;line-height:1.85;}
@@ -572,19 +566,6 @@ function toggleReplay(){
 </script>
 
 <script>
-/* ===== 微信环境提示 ===== */
-(function(){
-  if(!/MicroMessenger/i.test(navigator.userAgent))return;
-  var d=document.createElement('div');
-  d.id='wxTip';
-  d.innerHTML='⚠️ 微信内无法唤起地图 App —— 请点右上角 <b>「⋯」→「在浏览器打开」</b>。'
-            +'（点「百度导航」会自动复制地址，也可黏到地图 App 里搜）';
-  document.body.appendChild(d);
-  d.style.display='block';
-  /* 给工具栏让位 */
-  var tb=document.getElementById('toolbar');
-  if(tb)tb.style.top='58px';
-})();
 /* ===== 百度导航：先复制地址，再唤起百度地图 ===== */
 function baiduNav(i){
   var pt=(window.POINTS_REF||[])[i];
