@@ -194,6 +194,9 @@ const STAY_OVERRIDE = {           // 各点位停留时长（分钟）
 };
 
 let map, roadLayer, satLayer, routeLayers = [], comet = null;
+/* 高德/百度官方 Key（用于带额度的导航链接）*/
+const AMAP_KEY = '73cc4832ea5a216fa41a5d28dc1ac443';
+const BAIDU_AK = 'ixivqIOKzXeTQhUPN9el3wm141XglLqn';
 let ROUTE = null, rafId = null, t0 = 0, paused = false, progress = 0;
 let FULL = [], CUM = [], TRIP_DIST = 0;
 
@@ -223,23 +226,37 @@ function setBase(mode){
 }
 
 /* ================= 工具 ================= */
-/* 一键导航：高德 / 百度 双端唤起（手机点开直达导航，PC打开网页版） */
+/* 一键导航：高德 / 百度 双端唤起（手机点开直达导航，PC打开网页版）
+   关键点：
+   ① 目的地名用 full_name（完整机构名），否则地图上只显示“黄桥支行”这种模糊名
+   ② 百度必须用 BD-09 坐标；高德/route_data 里的 lnglat 是 GCJ-02，直喂百度会偏 ~600m */
+function navDest(pt){
+  /* 优先全名；若全名把支行名包在括号里（如“中国工商银行(苏州黄桥支行)”），
+     则去掉括号但保留括号内内容 → “中国工商银行苏州黄桥支行” */
+  let s = (pt.full_name||pt.name||'');
+  s = s.replace(/[（(]([^）)]*)[）)]/g, '$1').trim();
+  return s || pt.name || '';
+}
 function navUrl(kind, pt){
-  const lng=pt.lnglat[0], lat=pt.lnglat[1];
-  const nm=pt.name||'';
+  const gcjLng=pt.lnglat[0], gcjLat=pt.lnglat[1];
+  const bd=pt.bd09||[gcjLng,gcjLat];
+  const nm=navDest(pt);
+  const addr=pt.addr||'';
   if(kind==='amap'){
-    /* dev=0 有坐标用坐标；URI 规范 lat,lng,name */
-    return 'https://uri.amap.com/navigation?to='+lng+','+lat+','+encodeURIComponent(nm)+
+    /* 高德 URI：to=lng,lat,名称（坐标用 GCJ-02）*/
+    return 'https://uri.amap.com/navigation?to='+gcjLng+','+gcjLat+','+encodeURIComponent(nm)+
            '&mode=car&policy=1&src=fengge&coordinate=gaode&callnative=1';
   }
-  if(kind==='amapmark'){
-    return 'https://uri.amap.com/marker?position='+lng+','+lat+'&name='+encodeURIComponent(nm)+
-           '&coordinate=gaode&callnative=1';
+  if(kind==='amapweb'){
+    /* 高德网页版导航（不装App也能看）*/
+    return 'https://uri.amap.com/navigation?to='+gcjLng+','+gcjLat+','+encodeURIComponent(nm)+
+           '&mode=car&policy=1&src=fengge&coordinate=gaode';
   }
   if(kind==='baidu'){
-    /* 百度：坐标用 marker 更准；地址名当备选 */
-    return 'https://api.map.baidu.com/direction?destination=latlng:'+lat+','+lng+'|name:'+
-           encodeURIComponent(nm)+'&mode=driving&region=苏州&output=html&src=fengge';
+    /* 百度 direction：destination=latlng:lat,lng|name:名称（坐标必须 BD-09）*/
+    return 'https://api.map.baidu.com/direction?destination=latlng:'+bd[1]+','+bd[0]+
+           '|name:'+encodeURIComponent(addr?nm+'('+addr+')':nm)+
+           '&mode=driving&region=苏州&output=html&src=fengge&ak='+BAIDU_AK;
   }
   return '#';
 }
@@ -381,6 +398,7 @@ function render(){
     const icon=L.divIcon({className:'',html,iconSize:[30,30],iconAnchor:[15,15]});
     routeLayers.push(L.marker([pt.lnglat[1],pt.lnglat[0]],{icon,zIndexOffset:500})
       .addTo(map).bindPopup('<b>'+(i+1)+'. '+pt.name+'</b>'+
+        (pt.full_name?'<br><span style="color:#333;font-size:12.5px">'+pt.full_name+'</span>':'')+
         (pt.addr?'<br><span style="color:#888;font-size:12px">'+pt.addr+'</span>':'')+
         '<div style="margin-top:8px">'+
         '<a href="'+navUrl('amap',pt)+'" target="_blank" rel="noopener" '+
@@ -417,14 +435,14 @@ function render(){
     const d=document.createElement('div');
     d.className='tl-item'+(isEnd?' end':'');
     d.style.animationDelay=(i*0.08)+'s';
-    /* 一键导航按钮（起点也提供，便于反向查看） */
+    /* 一键导航按钮（目的地用官方全名 + 完整地址） */
     let navBtns='<div class="nav-actions">'+
       '<a class="nav-btn amap" href="'+navUrl('amap',pt)+'" target="_blank" rel="noopener" '+
         'title="用高德地图导航到该点">🧭 高德导航</a>'+
       '<a class="nav-btn baidu" href="'+navUrl('baidu',pt)+'" target="_blank" rel="noopener" '+
         'title="用百度地图导航到该点">🧭 百度导航</a>'+
       '</div>';
-    if(pt.addr)navBtns+='<div class="nav-addr">📍 '+pt.addr+'</div>';
+    if(pt.addr)navBtns+='<div class="nav-addr">📍 '+navDest(pt)+' · '+pt.addr+'</div>';
     d.innerHTML='<div class="card"><span class="name">'+(i+1)+'. '+pt.name+'</span>'+
       '<span class="tag'+(isEnd?' end':'')+'">'+(i===0?'起点':(isEnd?'终点':'途经'))+'</span>'+
       '<div class="times">'+times+'</div>'+navBtns+'</div>';
