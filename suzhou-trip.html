@@ -75,6 +75,21 @@
   .card .tag{display:inline-block;font-size:10px;padding:2px 9px;margin-left:7px;border-radius:9px;
     background:rgba(79,195,247,.16);color:#7dd8f8;vertical-align:1.5px;font-weight:600;letter-spacing:.4px;}
   .card .tag.end{background:rgba(255,159,67,.18);color:#ffb066;}
+/* 一键导航按钮 */
+.nav-btn{display:inline-block;margin-top:9px;margin-right:7px;padding:6px 13px;
+    font-size:12.5px;font-weight:600;border-radius:8px;text-decoration:none;
+    background:linear-gradient(140deg,rgba(79,195,247,.22),rgba(25,118,210,.28));
+    border:1px solid rgba(79,195,247,.5);color:#9fe4ff;
+    transition:transform .18s,background .18s,box-shadow .18s;cursor:pointer;}
+.nav-btn:hover{transform:translateY(-1px);background:linear-gradient(140deg,rgba(79,195,247,.42),rgba(25,118,210,.5));
+    box-shadow:0 4px 14px rgba(79,195,247,.32);color:#fff;}
+.nav-btn:active{transform:translateY(0);}
+.nav-btn.amap{border-color:rgba(79,195,247,.5);}
+.nav-btn.baidu{border-color:rgba(255,176,102,.5);color:#ffd0a3;
+    background:linear-gradient(140deg,rgba(255,159,67,.2),rgba(230,126,34,.26));}
+.nav-btn.baidu:hover{background:linear-gradient(140deg,rgba(255,159,67,.4),rgba(230,126,34,.5));
+    box-shadow:0 4px 14px rgba(255,159,67,.3);color:#fff;}
+.nav-addr{font-size:11.5px;color:#7f97b5;margin-top:5px;line-height:1.5;}
   .times{font-size:12px;color:#8ba8c4;margin-top:7px;line-height:1.85;}
   .times b{color:#4fc3f7;font-weight:600;font-variant-numeric:tabular-nums;}
   .seg-card{background:linear-gradient(150deg,rgba(28,22,14,.7),rgba(14,18,28,.92));}
@@ -208,6 +223,26 @@ function setBase(mode){
 }
 
 /* ================= 工具 ================= */
+/* 一键导航：高德 / 百度 双端唤起（手机点开直达导航，PC打开网页版） */
+function navUrl(kind, pt){
+  const lng=pt.lnglat[0], lat=pt.lnglat[1];
+  const nm=pt.name||'';
+  if(kind==='amap'){
+    /* dev=0 有坐标用坐标；URI 规范 lat,lng,name */
+    return 'https://uri.amap.com/navigation?to='+lng+','+lat+','+encodeURIComponent(nm)+
+           '&mode=car&policy=1&src=fengge&coordinate=gaode&callnative=1';
+  }
+  if(kind==='amapmark'){
+    return 'https://uri.amap.com/marker?position='+lng+','+lat+'&name='+encodeURIComponent(nm)+
+           '&coordinate=gaode&callnative=1';
+  }
+  if(kind==='baidu'){
+    /* 百度：坐标用 marker 更准；地址名当备选 */
+    return 'https://api.map.baidu.com/direction?destination=latlng:'+lat+','+lng+'|name:'+
+           encodeURIComponent(nm)+'&mode=driving&region=苏州&output=html&src=fengge';
+  }
+  return '#';
+}
 function fmtTime(min){const h=Math.floor(min/60)%24,m=Math.round(min%60);return (h<10?'0'+h:h)+':'+(m<10?'0'+m:m);}
 function fmtDur(sec){const m=Math.round(sec/60);return m>=60?(Math.floor(m/60)+'小时'+(m%60?(m%60)+'分':'')):m+'分钟';}
 function fmtDist(m){return (m/1000).toFixed(1)+' 公里';}
@@ -345,7 +380,16 @@ function render(){
     const html='<div class="pin'+(isEnd?' end':'')+'"><span class="halo"></span>'+(i+1)+'</div>';
     const icon=L.divIcon({className:'',html,iconSize:[30,30],iconAnchor:[15,15]});
     routeLayers.push(L.marker([pt.lnglat[1],pt.lnglat[0]],{icon,zIndexOffset:500})
-      .addTo(map).bindTooltip((i+1)+'. '+pt.name,{direction:'top',offset:[0,-16]}));
+      .addTo(map).bindPopup('<b>'+(i+1)+'. '+pt.name+'</b>'+
+        (pt.addr?'<br><span style="color:#888;font-size:12px">'+pt.addr+'</span>':'')+
+        '<div style="margin-top:8px">'+
+        '<a href="'+navUrl('amap',pt)+'" target="_blank" rel="noopener" '+
+          'style="display:inline-block;margin-right:6px;padding:4px 10px;border-radius:6px;'+
+          'background:#1976d2;color:#fff;text-decoration:none;font-size:12.5px">高德导航</a>'+
+        '<a href="'+navUrl('baidu',pt)+'" target="_blank" rel="noopener" '+
+          'style="display:inline-block;padding:4px 10px;border-radius:6px;'+
+          'background:#e67e22;color:#fff;text-decoration:none;font-size:12.5px">百度导航</a></div>')
+      .bindTooltip((i+1)+'. '+pt.name,{direction:'top',offset:[0,-16]}));
   });
 
   const all=FULL.slice();
@@ -373,9 +417,17 @@ function render(){
     const d=document.createElement('div');
     d.className='tl-item'+(isEnd?' end':'');
     d.style.animationDelay=(i*0.08)+'s';
+    /* 一键导航按钮（起点也提供，便于反向查看） */
+    let navBtns='<div class="nav-actions">'+
+      '<a class="nav-btn amap" href="'+navUrl('amap',pt)+'" target="_blank" rel="noopener" '+
+        'title="用高德地图导航到该点">🧭 高德导航</a>'+
+      '<a class="nav-btn baidu" href="'+navUrl('baidu',pt)+'" target="_blank" rel="noopener" '+
+        'title="用百度地图导航到该点">🧭 百度导航</a>'+
+      '</div>';
+    if(pt.addr)navBtns+='<div class="nav-addr">📍 '+pt.addr+'</div>';
     d.innerHTML='<div class="card"><span class="name">'+(i+1)+'. '+pt.name+'</span>'+
       '<span class="tag'+(isEnd?' end':'')+'">'+(i===0?'起点':(isEnd?'终点':'途经'))+'</span>'+
-      '<div class="times">'+times+'</div></div>';
+      '<div class="times">'+times+'</div>'+navBtns+'</div>';
     tl.appendChild(d);
 
     /* 午间休整分隔卡 */
