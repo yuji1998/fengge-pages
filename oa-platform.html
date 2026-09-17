@@ -1,0 +1,2551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>办公室综合服务平台 · 手机端原型</title>
+<style>
+
+:root{
+  --brand:#C8161E; --text:#1A1A1A; --sub:#8A8A8A; --line:#EDEDED;
+  --bg:#F5F5F7; --card:#fff; --blue:#1E5AA8; --green:#0F8A5F;
+  --cyan:#0E7490; --purple:#6D4AA8; --orange:#B45309;
+  --radius:12px; --shadow:0 2px 8px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+  background:#E9EBEF;color:var(--text);display:flex;justify-content:center;
+  align-items:flex-start;min-height:100vh;padding:20px 0;
+}
+/* ============ 手机外壳 ============ */
+#phone{
+  width:390px;height:844px;background:var(--bg);border-radius:44px;
+  box-shadow:0 12px 48px rgba(0,0,0,.18);position:relative;overflow:hidden;
+  border:10px solid #1a1a1c;display:flex;flex-direction:column;
+}
+#statusbar{
+  height:44px;flex:0 0 44px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;font-size:13px;font-weight:600;background:transparent;
+  position:absolute;top:0;left:0;right:0;z-index:60;pointer-events:none;
+}
+#statusbar .right{display:flex;gap:5px;align-items:center;font-size:11px;}
+#nav{
+  height:44px;flex:0 0 44px;display:flex;align-items:center;justify-content:center;
+  position:relative;font-size:17px;font-weight:600;z-index:50;margin-top:44px;
+  background:transparent;color:var(--text);
+}
+#nav.dark{color:#fff;}
+#nav .back{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  font-size:22px;cursor:pointer;font-weight:400;
+}
+#nav .more{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;letter-spacing:1px;
+}
+#screen{
+  flex:1;overflow-y:auto;overflow-x:hidden;position:relative;
+  padding:0 0 12px;scrollbar-width:none;
+}
+#screen::-webkit-scrollbar{display:none;}
+
+/* ============ Banner ============ */
+.banner{
+  margin:0 0 12px;padding:20px 20px 22px;color:#fff;position:relative;
+  border-radius:0 0 20px 20px;
+}
+.banner h1{margin:0 0 6px;font-size:22px;font-weight:700;}
+.banner p{margin:0;font-size:12.5px;opacity:.85;}
+
+/* ============ 区块 ============ */
+.sect-t{font-size:13px;color:var(--sub);margin:16px 16px 8px;font-weight:500;}
+.wrap{padding:0 16px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.card{
+  background:var(--card);border-radius:var(--radius);padding:14px;
+  box-shadow:var(--shadow);cursor:pointer;position:relative;
+  transition:transform .12s,box-shadow .12s;
+}
+.card:active{transform:scale(.97);box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.card .ico{
+  width:36px;height:36px;border-radius:9px;display:flex;align-items:center;
+  justify-content:center;font-size:19px;margin-bottom:9px;
+}
+.card .tt{font-size:14.5px;font-weight:600;margin-bottom:4px;color:var(--text);}
+.card .ds{font-size:11.5px;color:var(--sub);line-height:1.4;}
+.card.wide{grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:13px 14px;}
+.card.wide .ico{margin:0;flex:0 0 36px;}
+.card.wide .body{flex:1;min-width:0;}
+.card.wide .tt{margin-bottom:2px;}
+
+/* ============ 标签 ============ */
+.tag{
+  position:absolute;top:10px;right:10px;font-size:10.5px;padding:2px 7px;
+  border-radius:8px;font-weight:500;line-height:1.5;
+}
+.tag.inline{position:static;display:inline-block;margin-left:6px;}
+.tag.blue{background:#E8F0FB;color:#1E5AA8;}
+.tag.green{background:#E8F5EE;color:#0F8A5F;}
+.tag.orange{background:#FFF0E8;color:#D25A0F;}
+.tag.gray{background:#F2F2F2;color:#8A8A8A;}
+.tag.purple{background:#F0EEFA;color:#6D4AA8;}
+.tag.red{background:#FDECEC;color:#C8161E;}
+
+/* ============ 列表 ============ */
+.list{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);}
+.row{
+  display:flex;align-items:center;gap:12px;padding:14px 15px;
+  border-bottom:1px solid var(--line);cursor:pointer;background:var(--card);
+}
+.row:last-child{border-bottom:none;}
+.row:active{background:#FAFAFA;}
+.row .ri{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex:0 0 30px;}
+.row .rb{flex:1;min-width:0;}
+.row .rt{font-size:14.5px;font-weight:500;}
+.row .rs{font-size:11.5px;color:var(--sub);margin-top:3px;}
+.row .rr{font-size:13px;color:var(--sub);}
+.row .arrow{color:#C8C8C8;font-size:15px;}
+
+/* ============ 表单 ============ */
+.form{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);margin-bottom:12px;}
+.fitem{display:flex;align-items:center;min-height:50px;padding:12px 15px;border-bottom:1px solid var(--line);}
+.fitem:last-child{border-bottom:none;}
+.flabel{width:90px;flex:0 0 90px;font-size:14px;color:var(--text);}
+.flabel em{color:#E0362F;font-style:normal;margin-right:2px;}
+.fval{flex:1;font-size:14px;color:var(--text);text-align:right;}
+.fval.ph{color:#C0C0C0;}
+.finput{flex:1;border:none;outline:none;font-size:14px;text-align:right;font-family:inherit;background:transparent;color:var(--text);}
+.finput::placeholder{color:#C0C0C0;}
+.finput.left{text-align:left;}
+.farrow{color:#C8C8C8;font-size:14px;margin-left:6px;}
+.stepper{display:flex;align-items:center;gap:14px;}
+.stepper button{
+  width:26px;height:26px;border-radius:50%;border:1px solid #DCDCDC;background:#fff;
+  font-size:16px;color:#666;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;
+}
+.stepper button:active{background:#F0F0F0;}
+.stepper span{min-width:24px;text-align:center;font-size:15px;font-weight:600;}
+
+/* ============ 时段选择 ============ */
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:14px 15px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px;}
+.slot{
+  padding:9px 4px;border-radius:9px;border:1px solid #E5E5E5;font-size:13px;
+  text-align:center;cursor:pointer;background:#fff;transition:all .12s;
+}
+.slot.on{background:var(--green);color:#fff;border-color:var(--green);font-weight:500;}
+.slot.off{background:#F5F5F5;color:#C0C0C0;border-color:#F0F0F0;cursor:not-allowed;}
+.slot:not(.off):active{transform:scale(.96);}
+
+/* ============ 提示条 ============ */
+.tip{
+  display:flex;gap:8px;padding:11px 13px;border-radius:10px;font-size:12.5px;
+  line-height:1.55;margin-bottom:12px;background:#FFF7E6;color:#8A5A00;
+}
+.tip.info{background:#E8F0FB;color:#1A4B85;}
+.tip.green{background:#E8F5EE;color:#0A6847;}
+.tip.warn{background:#FFF0E8;color:#A34400;}
+.tip .ti{flex:0 0 auto;font-size:14px;}
+
+/* ============ 底部按钮 ============ */
+.submit{
+  display:block;width:calc(100% - 32px);margin:8px 16px 16px;padding:14px;
+  border:none;border-radius:24px;background:var(--brand);color:#fff;
+  font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;
+  box-shadow:0 4px 14px rgba(200,22,30,.28);transition:transform .12s;
+}
+.submit:active{transform:scale(.98);}
+.submit:disabled{background:#D5D5D5;box-shadow:none;cursor:not-allowed;color:#fff;}
+.submit.grey{background:#F0F0F0;color:#9A9A9A;box-shadow:none;}
+
+/* ============ 首页 ============ */
+.home-hero{
+  background:linear-gradient(135deg,#C8161E 0%,#A01018 100%);
+  color:#fff;padding:16px 20px 26px;border-radius:0 0 20px 20px;
+}
+.home-hero .ttl{font-size:21px;font-weight:700;margin-bottom:5px;}
+.home-hero .stl{font-size:12.5px;opacity:.85;}
+.home-hero .meta{
+  display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;
+}
+.home-hero .meta span{
+  font-size:11px;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:11px;
+}
+.mods{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:0 16px;margin-top:-14px;}
+.modcard{
+  background:#fff;border-radius:14px;padding:15px 13px;box-shadow:0 3px 12px rgba(0,0,0,.07);
+  cursor:pointer;position:relative;transition:transform .12s;
+}
+.modcard:active{transform:scale(.97);}
+.modcard .mi{
+  width:40px;height:40px;border-radius:11px;display:flex;align-items:center;
+  justify-content:center;font-size:21px;margin-bottom:10px;color:#fff;
+}
+.modcard .mt{font-size:15px;font-weight:600;margin-bottom:4px;}
+.modcard .md{font-size:11.5px;color:var(--sub);}
+.modcard .mc{
+  position:absolute;top:13px;right:13px;font-size:10.5px;color:var(--sub);
+  background:#F5F5F7;padding:2px 7px;border-radius:8px;
+}
+
+/* ============ 详情/统计 ============ */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
+.stat{background:#fff;border-radius:12px;padding:14px 10px;text-align:center;box-shadow:var(--shadow);}
+.stat .n{font-size:22px;font-weight:700;color:var(--brand);line-height:1.2;}
+.stat .l{font-size:11px;color:var(--sub);margin-top:4px;}
+.bar-row{display:flex;align-items:center;gap:10px;padding:9px 0;}
+.bar-row .bl{width:66px;font-size:12.5px;color:#555;flex:0 0 66px;}
+.bar-row .bt{flex:1;height:8px;background:#F0F0F0;border-radius:4px;overflow:hidden;}
+.bar-row .bf{height:100%;border-radius:4px;}
+.bar-row .bv{width:52px;text-align:right;font-size:12px;color:var(--sub);flex:0 0 52px;}
+
+/* ============ 规格浮层 ============ */
+#specbtn{
+  position:absolute;right:12px;bottom:12px;z-index:80;
+  width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.68);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;
+  box-shadow:0 3px 12px rgba(0,0,0,.3);
+}
+#spec{
+  position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:90;display:none;
+  align-items:flex-end;border-radius:34px;
+}
+#spec.on{display:flex;}
+#spec .box{
+  background:#fff;width:100%;border-radius:18px 18px 34px 34px;padding:18px 18px 24px;
+  max-height:78%;overflow-y:auto;
+}
+#spec h3{margin:0 0 12px;font-size:16px;display:flex;align-items:center;gap:8px;}
+#spec .kv{display:flex;padding:8px 0;border-bottom:1px solid #F2F2F2;font-size:13px;}
+#spec .kv:last-child{border-bottom:none;}
+#spec .kk{width:88px;flex:0 0 88px;color:var(--sub);}
+#spec .vv{flex:1;color:var(--text);line-height:1.5;word-break:break-all;}
+#spec .close{
+  margin-top:14px;width:100%;padding:12px;border:none;border-radius:22px;
+  background:#F2F2F2;color:#555;font-size:15px;cursor:pointer;font-family:inherit;
+}
+
+/* ============ 内页顶部返回条 ============ */
+.subline{padding:0 16px;margin-bottom:12px;}
+.crumb{font-size:11.5px;color:var(--sub);margin-bottom:8px;}
+.crumb b{color:var(--brand);font-weight:500;}
+
+/* ============ 空态 ============ */
+.empty{text-align:center;padding:48px 20px;color:#B0B0B0;font-size:13px;}
+.empty .ei{font-size:38px;margin-bottom:12px;opacity:.5;}
+
+/* ============ 底部固定操作区 ============ */
+.footbar{padding:8px 0 4px;}
+.copyright{text-align:center;font-size:11px;color:#B8B8B8;padding:14px 0 20px;}
+
+/* ============ 首页说明条 ============ */
+.demo-note{
+  margin:14px 16px 0;padding:11px 13px;border-radius:10px;background:#E8F0FB;
+  color:#1A4B85;font-size:12px;line-height:1.6;
+}
+.demo-note b{color:#0D3A6B;}
+
+</style>
+</head>
+<body>
+<div id="phone">
+  <div id="statusbar">
+    <span>9:41</span>
+    <span class="right">▮▮▮ ᯤ 🔋</span>
+  </div>
+  <div id="nav"></div>
+  <div id="screen"></div>
+  <div id="specbtn" onclick="openSpec()" title="查看规格说明">ⓘ</div>
+  <div id="spec" onclick="if(event.target===this)closeSpec()">
+    <div class="box">
+      <div id="specbox"></div>
+      <button class="close" onclick="closeSpec()">关闭</button>
+    </div>
+  </div>
+</div>
+<script>
+window.OA_DATA = {
+  "platform": {
+    "name": "办公室综合服务平台",
+    "org": "中国工商银行苏州分行",
+    "endpoints": [
+      "手机端工银e办公",
+      "PC端工银e办公",
+      "微信小程序"
+    ]
+  },
+  "colors": {
+    "餐饮服务": "#C8161E",
+    "生活预约": "#0F8A5F",
+    "门禁访客": "#1E5AA8",
+    "办公保障": "#0E7490",
+    "数据采集": "#6D4AA8",
+    "平台管理": "#B45309"
+  },
+  "modules": [
+    {
+      "key": "access_control",
+      "name": "门禁访客",
+      "color": "#1E5AA8",
+      "owner": "办公室、安全保卫部",
+      "priority": "三期",
+      "functions": [
+        "门禁通行",
+        "访客登记",
+        "通行记录管理"
+      ],
+      "pages": [
+        {
+          "id": "access_home",
+          "title": "门禁访客",
+          "route": "#/access",
+          "type": "home",
+          "service_target": "分行本部、辖内各行、劳服公司及物业公司员工",
+          "departments": "办公室、安全保卫部",
+          "priority": "三期",
+          "deps": "需改造现有系统",
+          "systems": "现有门禁系统",
+          "fields": [],
+          "status": [
+            "已上线",
+            "待上线"
+          ],
+          "note": "整合人脸识别、扫码、刷卡等多种通行方式",
+          "module": "access_control",
+          "module_name": "门禁访客",
+          "color": "#1E5AA8",
+          "owner": "办公室、安全保卫部",
+          "audience": ""
+        },
+        {
+          "id": "visitor_register",
+          "title": "访客登记",
+          "route": "#/access/visitor/register",
+          "type": "form",
+          "service_target": "非分行本部员工",
+          "departments": "办公室、安全保卫部",
+          "priority": "三期",
+          "deps": "与门禁通行联动",
+          "systems": "门禁系统",
+          "fields": [
+            {
+              "label": "访客姓名",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "访客手机号",
+              "type": "tel",
+              "required": true
+            },
+            {
+              "label": "被访人姓名",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "被访部门",
+              "type": "select",
+              "required": true
+            },
+            {
+              "label": "来访事由",
+              "type": "textarea",
+              "required": true
+            },
+            {
+              "label": "预计到达时间",
+              "type": "datetime",
+              "required": true
+            }
+          ],
+          "status": [
+            "待审批",
+            "已通过",
+            "已驳回"
+          ],
+          "note": "外部访客登记一体化",
+          "module": "access_control",
+          "module_name": "门禁访客",
+          "color": "#1E5AA8",
+          "owner": "办公室、安全保卫部",
+          "audience": ""
+        },
+        {
+          "id": "visitor_list",
+          "title": "访客记录",
+          "route": "#/access/visitor/list",
+          "type": "list",
+          "service_target": "全体员工/访客",
+          "departments": "办公室、安全保卫部",
+          "priority": "三期",
+          "deps": "",
+          "systems": "",
+          "fields": [],
+          "status": [
+            "全部",
+            "进行中",
+            "已完成"
+          ],
+          "note": "查看历史访客登记记录",
+          "module": "access_control",
+          "module_name": "门禁访客",
+          "color": "#1E5AA8",
+          "owner": "办公室、安全保卫部",
+          "audience": ""
+        },
+        {
+          "id": "access_log",
+          "title": "通行记录管理",
+          "route": "#/access/log",
+          "type": "list",
+          "service_target": "全体员工/访客",
+          "departments": "办公室、安全保卫部",
+          "priority": "三期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "查询日期",
+              "type": "date",
+              "required": false
+            },
+            {
+              "label": "人员姓名",
+              "type": "text",
+              "required": false
+            }
+          ],
+          "status": [
+            "正常",
+            "异常"
+          ],
+          "note": "通行记录全程可追溯、安全可控",
+          "module": "access_control",
+          "module_name": "门禁访客",
+          "color": "#1E5AA8",
+          "owner": "办公室、安全保卫部",
+          "audience": ""
+        }
+      ]
+    },
+    {
+      "key": "canteen",
+      "name": "餐饮服务",
+      "color": "#C8161E",
+      "owner": "劳服公司",
+      "priority": "一期",
+      "functions": [
+        "食堂用餐",
+        "咖啡西点服务",
+        "面点卤菜预订",
+        "周末订餐",
+        "餐单在线展示",
+        "餐品服务评价"
+      ],
+      "pages": [
+        {
+          "id": "canteen_home",
+          "title": "餐饮服务",
+          "route": "#/canteen",
+          "type": "home",
+          "service_target": "分行本部、辖内各行及劳服公司员工",
+          "departments": "劳服公司",
+          "priority": "一期",
+          "deps": "线下功能已具备",
+          "systems": "总行智慧餐饮",
+          "fields": [],
+          "status": [
+            "已上线",
+            "待上线"
+          ],
+          "note": "食堂餐饮 · 预订 · 评价",
+          "module": "canteen",
+          "module_name": "餐饮服务",
+          "color": "#C8161E",
+          "owner": "劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "canteen_menu",
+          "title": "餐单展示",
+          "route": "#/canteen/menu",
+          "type": "detail",
+          "service_target": "分行本部、辖内各行及劳服公司员工",
+          "departments": "劳服公司",
+          "priority": "一期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "日期",
+              "type": "date",
+              "value": "9月16日 周三",
+              "action": "click_to_switch"
+            },
+            {
+              "label": "餐次",
+              "type": "tab",
+              "options": [
+                "早餐",
+                "午餐",
+                "晚餐"
+              ],
+              "selected": "午餐"
+            },
+            {
+              "label": "菜品列表",
+              "type": "list",
+              "items": [
+                {
+                  "category": "主食",
+                  "items": [
+                    {
+                      "name": "香米饭",
+                      "price": "1.0"
+                    },
+                    {
+                      "name": "杂粮饭",
+                      "price": "1.0"
+                    }
+                  ]
+                },
+                {
+                  "category": "热 菜",
+                  "items": [
+                    {
+                      "name": "红烧肉",
+                      "price": "6.0"
+                    },
+                    {
+                      "name": "糖醋里脊",
+                      "price": "5.5"
+                    },
+                    {
+                      "name": "清炒时蔬",
+                      "price": "3.0"
+                    }
+                  ]
+                },
+                {
+                  "category": "汤品 / 水果",
+                  "items": [
+                    {
+                      "name": "番茄蛋花汤",
+                      "price": "2.0"
+                    },
+                    {
+                      "name": "时令水果",
+                      "price": "2.0"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "status": [
+            "已上线"
+          ],
+          "note": "每日/每周餐单查看",
+          "module": "canteen",
+          "module_name": "餐饮服务",
+          "color": "#C8161E",
+          "owner": "劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "canteen_weekend_order",
+          "title": "周末订餐",
+          "route": "#/canteen/weekend-order",
+          "type": "form",
+          "service_target": "分行本部、辖内各行及劳服公司员工",
+          "departments": "劳服公司",
+          "priority": "一期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "就餐日期",
+              "type": "date",
+              "value": "9月19日 · 周六",
+              "required": true
+            },
+            {
+              "label": "用餐时段",
+              "type": "radio",
+              "options": [
+                "午餐",
+                "晚餐"
+              ],
+              "selected": "午餐",
+              "required": true
+            },
+            {
+              "label": "用餐人数",
+              "type": "number_stepper",
+              "value": 12,
+              "min": 1,
+              "required": true
+            },
+            {
+              "label": "填报部门",
+              "type": "select",
+              "value": "金融科技部",
+              "required": true
+            },
+            {
+              "label": "联系电话",
+              "type": "tel",
+              "value": "138****1234",
+              "required": true
+            },
+            {
+              "label": "备注",
+              "type": "textarea",
+              "placeholder": "如忌口、特殊用餐需求等（选填）",
+              "required": false
+            }
+          ],
+          "status": [
+            "已提交",
+            "待确认"
+          ],
+          "note": "填写周末用餐人数，便于食堂提前备餐。周末暂未开通线上支付，用餐时现场结算。",
+          "module": "canteen",
+          "module_name": "餐饮服务",
+          "color": "#C8161E",
+          "owner": "劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "canteen_evaluation",
+          "title": "餐品评价",
+          "route": "#/canteen/evaluation",
+          "type": "form",
+          "service_target": "分行本部、辖内各行及劳服公司员工",
+          "departments": "劳服公司",
+          "priority": "一期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "评价对象",
+              "type": "select",
+              "value": "9月16日 午餐",
+              "action": "click_to_select"
+            },
+            {
+              "label": "餐品评分",
+              "type": "star_rating_list",
+              "items": [
+                {
+                  "name": "红烧肉",
+                  "score": 3
+                },
+                {
+                  "name": "糖醋里脊",
+                  "score": 4
+                },
+                {
+                  "name": "清炒时蔬",
+                  "score": 3
+                },
+                {
+                  "name": "番茄蛋花汤",
+                  "score": 4
+                }
+              ]
+            },
+            {
+              "label": "整体服务",
+              "type": "star_rating",
+              "score": 5,
+              "hint": "点击星星评价本次就餐服务"
+            },
+            {
+              "label": "建议与意见",
+              "type": "textarea",
+              "placeholder": "可输入您的建议与意见（选填）",
+              "required": false
+            }
+          ],
+          "status": [
+            "已提交"
+          ],
+          "note": "形成从预订、用餐到反馈评价的完整闭环",
+          "module": "canteen",
+          "module_name": "餐饮服务",
+          "color": "#C8161E",
+          "owner": "劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "canteen_snack_order",
+          "title": "面点卤菜预订",
+          "route": "#/canteen/snack-order",
+          "type": "form",
+          "service_target": "分行本部及各行",
+          "departments": "劳服公司",
+          "priority": "一期",
+          "deps": "需先对接总行接智慧餐饮",
+          "systems": "总行智慧餐饮",
+          "fields": [
+            {
+              "label": "预订日期",
+              "type": "date",
+              "required": true
+            },
+            {
+              "label": "商品选择",
+              "type": "multi_select",
+              "required": true
+            },
+            {
+              "label": "数量",
+              "type": "number",
+              "required": true
+            },
+            {
+              "label": "取餐地点",
+              "type": "select",
+              "required": true
+            }
+          ],
+          "status": [
+            "待上线"
+          ],
+          "note": "一期规划，需先对接总行智慧餐饮平台",
+          "module": "canteen",
+          "module_name": "餐饮服务",
+          "color": "#C8161E",
+          "owner": "劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "canteen_coffee_order",
+          "title": "咖啡西点",
+          "route": "#/canteen/coffee-order",
+          "type": "form",
+          "service_target": "分行本部、辖内各行及劳服公司员工",
+          "departments": "劳服公司",
+          "priority": "一期",
+          "deps": "需先对接总行接智慧餐饮",
+          "systems": "总行智慧餐饮",
+          "fields": [
+            {
+              "label": "商品选择",
+              "type": "multi_select",
+              "required": true
+            },
+            {
+              "label": "口味偏好",
+              "type": "select",
+              "required": false
+            },
+            {
+              "label": "取餐时间",
+              "type": "time",
+              "required": true
+            }
+          ],
+          "status": [
+            "待上线"
+          ],
+          "note": "一期规划，需先对接总行智慧餐饮平台",
+          "module": "canteen",
+          "module_name": "餐饮服务",
+          "color": "#C8161E",
+          "owner": "劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "canteen_dining",
+          "title": "食堂用餐",
+          "route": "#/canteen/dining",
+          "type": "detail",
+          "service_target": "分行本部、辖内各行及劳服公司员工",
+          "departments": "劳服公司",
+          "priority": "一期",
+          "deps": "线下功能已具备",
+          "systems": "",
+          "fields": [
+            {
+              "label": "当前状态",
+              "type": "text",
+              "value": "线下服务正常"
+            }
+          ],
+          "status": [
+            "已上线"
+          ],
+          "note": "食堂用餐在线服务，纳入平台统一入口",
+          "module": "canteen",
+          "module_name": "餐饮服务",
+          "color": "#C8161E",
+          "owner": "劳服公司",
+          "audience": ""
+        }
+      ]
+    },
+    {
+      "key": "life_reservation",
+      "name": "生活预约",
+      "color": "#0F8A5F",
+      "owner": "劳服公司",
+      "priority": "一期/二期",
+      "functions": [
+        "理发预约",
+        "医务室预约",
+        "健身房预约",
+        "阅览室预约",
+        "临时免费停车登记"
+      ],
+      "pages": [
+        {
+          "id": "life_home",
+          "title": "个人预约",
+          "route": "#/life",
+          "type": "home",
+          "service_target": "分行本部、辖内各行及劳服公司员工",
+          "departments": "劳服公司",
+          "priority": "一期",
+          "deps": "",
+          "systems": "",
+          "fields": [],
+          "status": [
+            "已上线",
+            "待上线"
+          ],
+          "note": "生活服务 · 在线预约",
+          "module": "life_reservation",
+          "module_name": "生活预约",
+          "color": "#0F8A5F",
+          "owner": "劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "life_haircut",
+          "title": "理发预约",
+          "route": "#/life/haircut",
+          "type": "form",
+          "service_target": "分行本部、辖内各行及劳服公司员工",
+          "departments": "劳服公司",
+          "priority": "一期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "我的预约",
+              "type": "link",
+              "action": "view_history"
+            },
+            {
+              "label": "提示",
+              "type": "alert",
+              "text": "请选择日期与可约时段，按预约时间前往理发室。"
+            },
+            {
+              "label": "日期",
+              "type": "date",
+              "value": "9月16日 周三",
+              "action": "click_to_switch"
+            },
+            {
+              "label": "选择时段",
+              "type": "grid_select",
+              "options": [
+                "09:00",
+                "09:30",
+                "10:00",
+                "10:30",
+                "11:00",
+                "14:00",
+                "14:30",
+                "15:00",
+                "15:30"
+              ],
+              "selected": "09:00",
+              "disabled": [
+                "14:00"
+              ]
+            },
+            {
+              "label": "预约人",
+              "type": "user_info",
+              "name": "张三",
+              "dept": "金融科技部",
+              "mode": "current_account"
+            }
+          ],
+          "status": [
+            "已预约",
+            "已取消"
+          ],
+          "note": "理发服务在线预约",
+          "module": "life_reservation",
+          "module_name": "生活预约",
+          "color": "#0F8A5F",
+          "owner": "劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "life_medical",
+          "title": "医务室预约",
+          "route": "#/life/medical",
+          "type": "form",
+          "service_target": "分行本部、辖内各行及劳服公司员工",
+          "departments": "劳服公司",
+          "priority": "一期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "我的预约",
+              "type": "link",
+              "action": "view_history"
+            },
+            {
+              "label": "提示",
+              "type": "alert",
+              "text": "请选择就诊时段。如遇紧急不适，请直接前往医务室或就医。"
+            },
+            {
+              "label": "日期",
+              "type": "date",
+              "value": "9月16日 周三",
+              "action": "click_to_switch"
+            },
+            {
+              "label": "选择时段",
+              "type": "grid_select",
+              "options": [
+                "09:00",
+                "09:30",
+                "10:00",
+                "10:30",
+                "14:00",
+                "15:00"
+              ],
+              "selected": "09:30",
+              "disabled": [
+                "14:00"
+              ]
+            },
+            {
+              "label": "预约人",
+              "type": "user_info",
+              "name": "张三",
+              "dept": "金融科技部",
+              "mode": "current_account"
+            }
+          ],
+          "status": [
+            "已预约",
+            "已取消"
+          ],
+          "note": "医务室在线预约",
+          "module": "life_reservation",
+          "module_name": "生活预约",
+          "color": "#0F8A5F",
+          "owner": "劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "life_gym",
+          "title": "健身房预约",
+          "route": "#/life/gym",
+          "type": "form",
+          "service_target": "分行本部、辖内各行及劳服公司员工",
+          "departments": "劳服公司",
+          "priority": "一期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "我的预约",
+              "type": "link",
+              "action": "view_history"
+            },
+            {
+              "label": "提示",
+              "type": "alert",
+              "text": "预约健身房开放场次，按场次入场锻炼。"
+            },
+            {
+              "label": "日期",
+              "type": "date",
+              "value": "9月16日 周三",
+              "action": "click_to_switch"
+            },
+            {
+              "label": "选择场次",
+              "type": "grid_select",
+              "options": [
+                "09:00–10:00",
+                "12:00–13:00",
+                "17:00–18:00",
+                "18:00–19:00",
+                "19:00–20:00"
+              ],
+              "selected": "12:00–13:00",
+              "disabled": [
+                "19:00–20:00"
+              ]
+            },
+            {
+              "label": "预约人",
+              "type": "user_info",
+              "name": "张三",
+              "dept": "金融科技部",
+              "mode": "current_account"
+            }
+          ],
+          "status": [
+            "已预约",
+            "已取消"
+          ],
+          "note": "健身房在线预约",
+          "module": "life_reservation",
+          "module_name": "生活预约",
+          "color": "#0F8A5F",
+          "owner": "劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "life_library",
+          "title": "阅览室预约",
+          "route": "#/life/library",
+          "type": "form",
+          "service_target": "分行本部、辖内各行及劳服公司员工",
+          "departments": "劳服公司",
+          "priority": "一期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "我的预约",
+              "type": "link",
+              "action": "view_history"
+            },
+            {
+              "label": "提示",
+              "type": "alert",
+              "text": "预约阅览室座位使用时段，凭预约记录入座。"
+            },
+            {
+              "label": "日期",
+              "type": "date",
+              "value": "9月16日 周三",
+              "action": "click_to_switch"
+            },
+            {
+              "label": "选择时段",
+              "type": "grid_select",
+              "options": [
+                "09:00–10:30",
+                "10:30–12:00",
+                "14:00–15:30",
+                "15:30–17:00"
+              ],
+              "selected": "14:00–15:30",
+              "disabled": []
+            },
+            {
+              "label": "预约人",
+              "type": "user_info",
+              "name": "张三",
+              "dept": "金融科技部",
+              "mode": "current_account"
+            }
+          ],
+          "status": [
+            "已预约",
+            "已取消"
+          ],
+          "note": "阅览室在线预约",
+          "module": "life_reservation",
+          "module_name": "生活预约",
+          "color": "#0F8A5F",
+          "owner": "劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "life_parking",
+          "title": "临时免费停车登记",
+          "route": "#/life/parking",
+          "type": "form",
+          "service_target": "分行本部、辖内各行及劳服公司员工",
+          "departments": "劳服公司",
+          "priority": "二期",
+          "deps": "对接停车系统",
+          "systems": "停车系统",
+          "fields": [
+            {
+              "label": "车牌号",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "进入时间",
+              "type": "datetime",
+              "required": true
+            },
+            {
+              "label": "事由",
+              "type": "select",
+              "options": [
+                "公务",
+                "访客",
+                "其他"
+              ],
+              "required": true
+            }
+          ],
+          "status": [
+            "待上线"
+          ],
+          "note": "临时免费停车在线登记",
+          "module": "life_reservation",
+          "module_name": "生活预约",
+          "color": "#0F8A5F",
+          "owner": "劳服公司",
+          "audience": ""
+        }
+      ]
+    },
+    {
+      "key": "office_support",
+      "name": "办公保障",
+      "color": "#0E7490",
+      "owner": "办公室、劳服公司",
+      "priority": "二期",
+      "functions": [
+        "物品申请",
+        "公车申请",
+        "接待申请",
+        "会议室申请",
+        "加班申请",
+        "办公电话申请",
+        "科技维修",
+        "物业维修"
+      ],
+      "pages": [
+        {
+          "id": "office_home",
+          "title": "办公保障",
+          "route": "#/office",
+          "type": "home",
+          "service_target": "分行本部各部室",
+          "departments": "办公室、劳服公司",
+          "priority": "二期",
+          "deps": "对接现有系统，现有系统需改造",
+          "systems": "现有OA系统",
+          "fields": [],
+          "status": [
+            "已上线"
+          ],
+          "note": "办公保障服务统一入口",
+          "module": "office_support",
+          "module_name": "办公保障",
+          "color": "#0E7490",
+          "owner": "办公室、劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "office_item_apply",
+          "title": "物品申请",
+          "route": "#/office/item-apply",
+          "type": "form",
+          "service_target": "分行本部各部室",
+          "departments": "办公室",
+          "priority": "二期",
+          "deps": "对接现有系统",
+          "systems": "现有OA系统",
+          "fields": [
+            {
+              "label": "物品名称",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "数量",
+              "type": "number",
+              "required": true
+            },
+            {
+              "label": "用途说明",
+              "type": "textarea",
+              "required": true
+            },
+            {
+              "label": "期望领取时间",
+              "type": "date",
+              "required": true
+            }
+          ],
+          "status": [
+            "待审批",
+            "已通过",
+            "已驳回"
+          ],
+          "note": "物品申请线上提交与审批",
+          "module": "office_support",
+          "module_name": "办公保障",
+          "color": "#0E7490",
+          "owner": "办公室、劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "office_car_apply",
+          "title": "公车申请",
+          "route": "#/office/car-apply",
+          "type": "form",
+          "service_target": "分行本部各部室",
+          "departments": "办公室、劳服公司",
+          "priority": "二期",
+          "deps": "对接现有系统",
+          "systems": "现有OA系统",
+          "fields": [
+            {
+              "label": "用车事由",
+              "type": "textarea",
+              "required": true
+            },
+            {
+              "label": "出发地",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "目的地",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "用车时间",
+              "type": "datetime_range",
+              "required": true
+            },
+            {
+              "label": "乘车人数",
+              "type": "number",
+              "required": true
+            }
+          ],
+          "status": [
+            "待审批",
+            "已通过",
+            "已驳回"
+          ],
+          "note": "公车申请线上提交与审批",
+          "module": "office_support",
+          "module_name": "办公保障",
+          "color": "#0E7490",
+          "owner": "办公室、劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "office_reception_apply",
+          "title": "接待申请",
+          "route": "#/office/reception-apply",
+          "type": "form",
+          "service_target": "分行本部各部室",
+          "departments": "办公室、劳服公司",
+          "priority": "二期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "接待对象",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "接待级别",
+              "type": "select",
+              "options": [
+                "一般",
+                "重要",
+                "VIP"
+              ],
+              "required": true
+            },
+            {
+              "label": "接待时间",
+              "type": "datetime",
+              "required": true
+            },
+            {
+              "label": "接待地点",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "陪同人员",
+              "type": "multi_select",
+              "required": false
+            }
+          ],
+          "status": [
+            "待审批",
+            "已通过",
+            "已驳回"
+          ],
+          "note": "接待申请线上提交与审批",
+          "module": "office_support",
+          "module_name": "办公保障",
+          "color": "#0E7490",
+          "owner": "办公室、劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "office_meeting_apply",
+          "title": "会议室申请",
+          "route": "#/office/meeting-apply",
+          "type": "form",
+          "service_target": "分行本部各部室",
+          "departments": "办公室、劳服公司",
+          "priority": "二期",
+          "deps": "链接至总行会议系统",
+          "systems": "总行会议系统",
+          "fields": [
+            {
+              "label": "会议主题",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "会议室",
+              "type": "select",
+              "required": true
+            },
+            {
+              "label": "会议时间",
+              "type": "datetime_range",
+              "required": true
+            },
+            {
+              "label": "参会人数",
+              "type": "number",
+              "required": true
+            },
+            {
+              "label": "设备需求",
+              "type": "multi_select",
+              "options": [
+                "投影仪",
+                "白板",
+                "视频会议"
+              ],
+              "required": false
+            }
+          ],
+          "status": [
+            "待审批",
+            "已通过",
+            "已驳回"
+          ],
+          "note": "会议室申请线上提交与审批",
+          "module": "office_support",
+          "module_name": "办公保障",
+          "color": "#0E7490",
+          "owner": "办公室、劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "office_overtime_apply",
+          "title": "加班申请",
+          "route": "#/office/overtime-apply",
+          "type": "form",
+          "service_target": "分行本部各部室",
+          "departments": "办公室、劳服公司",
+          "priority": "二期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "加班日期",
+              "type": "date",
+              "required": true
+            },
+            {
+              "label": "加班时段",
+              "type": "select",
+              "options": [
+                "上午",
+                "下午",
+                "晚上",
+                "全天"
+              ],
+              "required": true
+            },
+            {
+              "label": "加班事由",
+              "type": "textarea",
+              "required": true
+            }
+          ],
+          "status": [
+            "待审批",
+            "已通过",
+            "已驳回"
+          ],
+          "note": "加班申请线上提交与审批",
+          "module": "office_support",
+          "module_name": "办公保障",
+          "color": "#0E7490",
+          "owner": "办公室、劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "office_phone_apply",
+          "title": "办公电话申请",
+          "route": "#/office/phone-apply",
+          "type": "form",
+          "service_target": "分行本部各部室",
+          "departments": "办公室、劳服公司",
+          "priority": "二期",
+          "deps": "合并至物品领用模块",
+          "systems": "",
+          "fields": [
+            {
+              "label": "申请类型",
+              "type": "select",
+              "options": [
+                "新装",
+                "移机",
+                "拆机"
+              ],
+              "required": true
+            },
+            {
+              "label": "安装位置",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "用途说明",
+              "type": "textarea",
+              "required": true
+            }
+          ],
+          "status": [
+            "待审批",
+            "已通过",
+            "已驳回"
+          ],
+          "note": "办公电话申请线上提交与审批",
+          "module": "office_support",
+          "module_name": "办公保障",
+          "color": "#0E7490",
+          "owner": "办公室、劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "office_tech_repair",
+          "title": "科技维修",
+          "route": "#/office/tech-repair",
+          "type": "form",
+          "service_target": "分行本部各部室",
+          "departments": "办公室、劳服公司",
+          "priority": "二期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "故障设备",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "故障描述",
+              "type": "textarea",
+              "required": true
+            },
+            {
+              "label": "设备位置",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "联系人",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "联系电话",
+              "type": "tel",
+              "required": true
+            }
+          ],
+          "status": [
+            "待处理",
+            "处理中",
+            "已完成"
+          ],
+          "note": "科技维修申请线上提交与审批",
+          "module": "office_support",
+          "module_name": "办公保障",
+          "color": "#0E7490",
+          "owner": "办公室、劳服公司",
+          "audience": ""
+        },
+        {
+          "id": "office_property_repair",
+          "title": "物业维修",
+          "route": "#/office/property-repair",
+          "type": "form",
+          "service_target": "分行本部各部室",
+          "departments": "办公室、劳服公司",
+          "priority": "二期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "维修类型",
+              "type": "select",
+              "options": [
+                "水电",
+                "门窗",
+                "家具",
+                "其他"
+              ],
+              "required": true
+            },
+            {
+              "label": "故障描述",
+              "type": "textarea",
+              "required": true
+            },
+            {
+              "label": "位置",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "紧急程度",
+              "type": "radio",
+              "options": [
+                "普通",
+                "紧急"
+              ],
+              "required": true
+            }
+          ],
+          "status": [
+            "待处理",
+            "处理中",
+            "已完成"
+          ],
+          "note": "物业维修申请线上提交与审批",
+          "module": "office_support",
+          "module_name": "办公保障",
+          "color": "#0E7490",
+          "owner": "办公室、劳服公司",
+          "audience": ""
+        }
+      ]
+    },
+    {
+      "key": "data_collection",
+      "name": "数据采集",
+      "color": "#6D4AA8",
+      "owner": "分行管理",
+      "priority": "一期/三期",
+      "functions": [
+        "绑定卡",
+        "e支付",
+        "数币",
+        "员工建议反馈",
+        "车位管理",
+        "健康打卡",
+        "人力资源同步"
+      ],
+      "pages": [
+        {
+          "id": "data_home",
+          "title": "数据采集",
+          "route": "#/data",
+          "type": "home",
+          "service_target": "全体员工",
+          "departments": "分行管理",
+          "priority": "一期",
+          "deps": "需先对接总行接智慧餐饮",
+          "systems": "总行智慧餐饮, 人力资源系统",
+          "fields": [],
+          "status": [
+            "已上线",
+            "待上线"
+          ],
+          "note": "基础数据与反馈采集",
+          "module": "data_collection",
+          "module_name": "数据采集",
+          "color": "#6D4AA8",
+          "owner": "分行管理",
+          "audience": ""
+        },
+        {
+          "id": "data_bind_card",
+          "title": "绑定卡",
+          "route": "#/data/bind-card",
+          "type": "form",
+          "service_target": "全体员工",
+          "departments": "分行管理",
+          "priority": "一期",
+          "deps": "需先对接总行接智慧餐饮",
+          "systems": "总行智慧餐饮",
+          "fields": [
+            {
+              "label": "卡号",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "持卡人姓名",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "卡类型",
+              "type": "select",
+              "options": [
+                "工牌",
+                "饭卡",
+                "其他"
+              ],
+              "required": true
+            }
+          ],
+          "status": [
+            "已绑定",
+            "未绑定"
+          ],
+          "note": "员工绑定卡基础功能",
+          "module": "data_collection",
+          "module_name": "数据采集",
+          "color": "#6D4AA8",
+          "owner": "分行管理",
+          "audience": ""
+        },
+        {
+          "id": "data_e_pay",
+          "title": "e支付",
+          "route": "#/data/e-pay",
+          "type": "detail",
+          "service_target": "全体员工",
+          "departments": "分行管理",
+          "priority": "一期",
+          "deps": "需先对接总行接智慧餐饮",
+          "systems": "总行智慧餐饮",
+          "fields": [
+            {
+              "label": "账户余额",
+              "type": "text",
+              "value": "100.00"
+            },
+            {
+              "label": "充值入口",
+              "type": "button",
+              "action": "recharge"
+            }
+          ],
+          "status": [
+            "已上线"
+          ],
+          "note": "e支付功能",
+          "module": "data_collection",
+          "module_name": "数据采集",
+          "color": "#6D4AA8",
+          "owner": "分行管理",
+          "audience": ""
+        },
+        {
+          "id": "data_digital_rmb",
+          "title": "数币",
+          "route": "#/data/digital-rmb",
+          "type": "detail",
+          "service_target": "全体员工",
+          "departments": "分行管理",
+          "priority": "一期",
+          "deps": "需先对接总行接智慧餐饮",
+          "systems": "总行智慧餐饮",
+          "fields": [
+            {
+              "label": "钱包余额",
+              "type": "text",
+              "value": "50.00"
+            },
+            {
+              "label": "充值入口",
+              "type": "button",
+              "action": "recharge"
+            }
+          ],
+          "status": [
+            "已上线"
+          ],
+          "note": "数字人民币（数币）功能",
+          "module": "data_collection",
+          "module_name": "数据采集",
+          "color": "#6D4AA8",
+          "owner": "分行管理",
+          "audience": ""
+        },
+        {
+          "id": "data_feedback",
+          "title": "员工建议反馈",
+          "route": "#/data/feedback",
+          "type": "form",
+          "service_target": "全体员工",
+          "departments": "分行管理",
+          "priority": "一期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "反馈类型",
+              "type": "select",
+              "options": [
+                "服务建议",
+                "投诉",
+                "表扬",
+                "其他"
+              ],
+              "required": true
+            },
+            {
+              "label": "反馈内容",
+              "type": "textarea",
+              "required": true
+            },
+            {
+              "label": "联系方式",
+              "type": "tel",
+              "required": false
+            }
+          ],
+          "status": [
+            "已提交",
+            "已回复"
+          ],
+          "note": "员工建议反馈功能",
+          "module": "data_collection",
+          "module_name": "数据采集",
+          "color": "#6D4AA8",
+          "owner": "分行管理",
+          "audience": ""
+        },
+        {
+          "id": "data_parking_mgmt",
+          "title": "车位管理",
+          "route": "#/data/parking-mgmt",
+          "type": "list",
+          "service_target": "全体员工",
+          "departments": "分行管理",
+          "priority": "三期",
+          "deps": "规划中",
+          "systems": "",
+          "fields": [
+            {
+              "label": "车位号",
+              "type": "text",
+              "required": false
+            },
+            {
+              "label": "状态",
+              "type": "select",
+              "options": [
+                "空闲",
+                "占用"
+              ],
+              "required": false
+            }
+          ],
+          "status": [
+            "规划中"
+          ],
+          "note": "车位管理功能",
+          "module": "data_collection",
+          "module_name": "数据采集",
+          "color": "#6D4AA8",
+          "owner": "分行管理",
+          "audience": ""
+        },
+        {
+          "id": "data_health_check",
+          "title": "健康打卡",
+          "route": "#/data/health-check",
+          "type": "form",
+          "service_target": "全体员工",
+          "departments": "分行管理",
+          "priority": "三期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "体温",
+              "type": "number",
+              "required": true
+            },
+            {
+              "label": "健康状况",
+              "type": "radio",
+              "options": [
+                "正常",
+                "异常"
+              ],
+              "required": true
+            },
+            {
+              "label": "备注",
+              "type": "textarea",
+              "required": false
+            }
+          ],
+          "status": [
+            "已打卡",
+            "未打卡"
+          ],
+          "note": "健康打卡基础功能",
+          "module": "data_collection",
+          "module_name": "数据采集",
+          "color": "#6D4AA8",
+          "owner": "分行管理",
+          "audience": ""
+        },
+        {
+          "id": "data_hr_sync",
+          "title": "人力资源同步",
+          "route": "#/data/hr-sync",
+          "type": "detail",
+          "service_target": "全体员工",
+          "departments": "分行管理",
+          "priority": "一期",
+          "deps": "同步人力资源系统",
+          "systems": "人力资源系统",
+          "fields": [
+            {
+              "label": "同步状态",
+              "type": "text",
+              "value": "正常"
+            },
+            {
+              "label": "最后同步时间",
+              "type": "datetime",
+              "value": "2023-09-16 08:00"
+            }
+          ],
+          "status": [
+            "已同步"
+          ],
+          "note": "同步人力资源系统，建立清晰的用户授权体系",
+          "module": "data_collection",
+          "module_name": "数据采集",
+          "color": "#6D4AA8",
+          "owner": "分行管理",
+          "audience": ""
+        }
+      ]
+    },
+    {
+      "key": "platform_mgmt",
+      "name": "平台管理",
+      "color": "#B45309",
+      "owner": "平台管理",
+      "priority": "全周期/三期",
+      "functions": [
+        "数据统计分析",
+        "后勤人员考勤",
+        "物业巡检管理",
+        "信息精准推送"
+      ],
+      "pages": [
+        {
+          "id": "mgmt_home",
+          "title": "平台管理",
+          "route": "#/mgmt",
+          "type": "home",
+          "service_target": "平台管理员",
+          "departments": "平台管理",
+          "priority": "全周期",
+          "deps": "",
+          "systems": "",
+          "fields": [],
+          "status": [
+            "已上线"
+          ],
+          "note": "平台后台管理入口",
+          "module": "platform_mgmt",
+          "module_name": "平台管理",
+          "color": "#B45309",
+          "owner": "平台管理",
+          "audience": ""
+        },
+        {
+          "id": "mgmt_stats",
+          "title": "数据统计分析",
+          "route": "#/mgmt/stats",
+          "type": "detail",
+          "service_target": "平台管理员",
+          "departments": "平台管理",
+          "priority": "全周期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "统计周期",
+              "type": "date_range",
+              "required": true
+            },
+            {
+              "label": "模块选择",
+              "type": "multi_select",
+              "options": [
+                "餐饮服务",
+                "生活预约",
+                "办公保障"
+              ],
+              "required": true
+            },
+            {
+              "label": "导出报表",
+              "type": "button",
+              "action": "export"
+            }
+          ],
+          "status": [
+            "已生成"
+          ],
+          "note": "对各服务模块运行数据进行汇总、分析，生成管理报表",
+          "module": "platform_mgmt",
+          "module_name": "平台管理",
+          "color": "#B45309",
+          "owner": "平台管理",
+          "audience": ""
+        },
+        {
+          "id": "mgmt_attendance",
+          "title": "后勤人员考勤",
+          "route": "#/mgmt/attendance",
+          "type": "list",
+          "service_target": "后勤人员",
+          "departments": "平台管理",
+          "priority": "三期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "人员姓名",
+              "type": "text",
+              "required": false
+            },
+            {
+              "label": "考勤日期",
+              "type": "date",
+              "required": false
+            },
+            {
+              "label": "状态",
+              "type": "select",
+              "options": [
+                "正常",
+                "迟到",
+                "早退",
+                "缺勤"
+              ],
+              "required": false
+            }
+          ],
+          "status": [
+            "已记录"
+          ],
+          "note": "对物业、劳服等综合服务人员进行线上化考勤管理",
+          "module": "platform_mgmt",
+          "module_name": "平台管理",
+          "color": "#B45309",
+          "owner": "平台管理",
+          "audience": ""
+        },
+        {
+          "id": "mgmt_inspection",
+          "title": "物业巡检管理",
+          "route": "#/mgmt/inspection",
+          "type": "list",
+          "service_target": "物业人员",
+          "departments": "平台管理",
+          "priority": "三期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "巡检任务",
+              "type": "text",
+              "required": false
+            },
+            {
+              "label": "巡检人",
+              "type": "text",
+              "required": false
+            },
+            {
+              "label": "状态",
+              "type": "select",
+              "options": [
+                "待执行",
+                "执行中",
+                "已完成"
+              ],
+              "required": false
+            }
+          ],
+          "status": [
+            "待执行",
+            "执行中",
+            "已完成"
+          ],
+          "note": "支持物业巡检任务的线上派发、执行过程记录与结果反馈",
+          "module": "platform_mgmt",
+          "module_name": "平台管理",
+          "color": "#B45309",
+          "owner": "平台管理",
+          "audience": ""
+        },
+        {
+          "id": "mgmt_push",
+          "title": "信息精准推送",
+          "route": "#/mgmt/push",
+          "type": "form",
+          "service_target": "全体员工",
+          "departments": "平台管理",
+          "priority": "一期",
+          "deps": "",
+          "systems": "",
+          "fields": [
+            {
+              "label": "推送标题",
+              "type": "text",
+              "required": true
+            },
+            {
+              "label": "推送内容",
+              "type": "textarea",
+              "required": true
+            },
+            {
+              "label": "目标人群",
+              "type": "multi_select",
+              "options": [
+                "全体员工",
+                "特定部门",
+                "特定角色"
+              ],
+              "required": true
+            },
+            {
+              "label": "推送时间",
+              "type": "datetime",
+              "required": true
+            }
+          ],
+          "status": [
+            "已发送",
+            "定时发送"
+          ],
+          "note": "实现平台公告、服务提醒、审批通知等信息的定向、及时推送",
+          "module": "platform_mgmt",
+          "module_name": "平台管理",
+          "color": "#B45309",
+          "owner": "平台管理",
+          "audience": ""
+        }
+      ]
+    }
+  ]
+};
+window.OA_TOKENS = {
+  "shell": {
+    "w": 390,
+    "h": 844,
+    "radius": 44,
+    "statusbar": "9:41"
+  },
+  "font": {
+    "family": "-apple-system,'PingFang SC','Microsoft YaHei',sans-serif",
+    "h1": 20,
+    "h2": 17,
+    "body": 15,
+    "small": 12,
+    "tiny": 11
+  },
+  "radius": {
+    "card": 12,
+    "btn": 24,
+    "banner": 16
+  },
+  "space": {
+    "page": 16,
+    "gap": 12
+  },
+  "brand": {
+    "primary": "#C8161E",
+    "text": "#1A1A1A",
+    "sub": "#8A8A8A",
+    "line": "#EDEDED",
+    "bg": "#F5F5F7",
+    "card": "#FFFFFF"
+  },
+  "tag": {
+    "待上线": {
+      "bg": "#FFF0E8",
+      "fg": "#D25A0F"
+    },
+    "已上线": {
+      "bg": "#E8F5EE",
+      "fg": "#0F8A5F"
+    },
+    "待审批": {
+      "bg": "#FFF7E6",
+      "fg": "#B45309"
+    },
+    "已通过": {
+      "bg": "#E8F5EE",
+      "fg": "#0F8A5F"
+    },
+    "已驳回": {
+      "bg": "#FDECEC",
+      "fg": "#C8161E"
+    },
+    "已预约": {
+      "bg": "#E8F5EE",
+      "fg": "#0F8A5F"
+    },
+    "规划中": {
+      "bg": "#F0EEFA",
+      "fg": "#6D4AA8"
+    },
+    "禁用": {
+      "bg": "#F2F2F2",
+      "fg": "#B0B0B0"
+    }
+  }
+};
+</script>
+<script>
+// ============================================================
+// 办公室综合服务平台 · 手机端可点击原型
+// 引擎：hash 路由 + 按 mock.json 自动渲染 39 页
+// 用途：科技部开发参考｜数据全部 mock
+// ============================================================
+const P = window.OA_DATA;
+const T = window.OA_TOKENS;
+
+const ICON = {
+  canteen_home:'🍽️', canteen_menu:'📋', canteen_weekend_order:'📅',
+  canteen_evaluation:'⭐', canteen_snack_order:'🥟', canteen_coffee_order:'☕',
+  canteen_dining:'🍚',
+  life_home:'🏃', life_haircut:'💈', life_medical:'🏥', life_gym:'🏋️',
+  life_library:'📖', life_parking:'🚗',
+  access_home:'🚪', visitor_register:'📝', visitor_list:'📋', access_log:'📊',
+  office_home:'🧰', office_item_apply:'📦', office_car_apply:'🚙',
+  office_reception_apply:'🤝', office_meeting_apply:'🏛️', office_overtime_apply:'⏰',
+  office_phone_apply:'☎️', office_tech_repair:'🔧', office_property_repair:'🏢',
+  data_home:'📈', data_bind_card:'💳', data_e_pay:'💰', data_digital_rmb:'🪙',
+  data_feedback:'💬', data_parking_mgmt:'🅿️', data_health_check:'❤️', data_hr_sync:'👥',
+  mgmt_home:'⚙️', mgmt_stats:'📊', mgmt_attendance:'🗓️', mgmt_inspection:'🔍',
+  mgmt_push:'🔔'
+};
+const MI = { canteen:'🍽️', life_reservation:'🏃', access_control:'🚪',
+  office_support:'🧰', data_collection:'📈', platform_mgmt:'⚙️' };
+
+const MOCK = {
+  user: {name:'张三', dept:'金融科技部', avatar:'张'},
+  menu: {主食:[['香米饭',1.0],['杂粮饭',1.0]], 热菜:[['红烧肉',6.0],['糖醋里脊',5.5],['清炒时蔬',3.0]], '汤品/水果':[['番茄蛋花汤',2.0],['时令水果',2.0]]},
+  slots: {
+    life_haircut:['09:00','09:30','10:00','10:30','11:00','14:00','14:30','15:00','15:30'],
+    life_medical:['09:00','09:30','10:00','10:30','14:00','15:00'],
+    life_gym:['09:00–10:00','12:00–13:00','17:00–18:00','18:00–19:00','19:00–20:00'],
+    life_library:['09:00–10:30','10:30–12:00','14:00–15:30','15:30–17:00']
+  },
+  slotOff: {life_haircut:[5], life_medical:[4], life_gym:[4], life_library:[]},
+  slotOn:  {life_haircut:0, life_medical:1, life_gym:1, life_library:2}
+};
+
+let ROUTE = '#/';
+let hist = [];
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+function allPages(){ return P.modules.flatMap(m => m.pages.map(p => Object.assign({}, p, {_mod:m}))); }
+function pageById(id){ return allPages().find(p => p.id === id); }
+
+function tagClass(s){
+  if(!s) return 'gray';
+  if(/待上线|待审批|待处理|待执行|规划中/.test(s)) return 'orange';
+  if(/已上线|已通过|已完成|已预约|已绑定|已同步|已打卡|已生成|已记录|已回复/.test(s)) return 'green';
+  if(/驳回|异常/.test(s)) return 'red';
+  if(/进行中|处理中|执行中/.test(s)) return 'blue';
+  return 'gray';
+}
+
+function go(route){
+  if(ROUTE !== route) hist.push(ROUTE);
+  ROUTE = route;
+  render();
+  const sc = document.getElementById('screen'); if(sc) sc.scrollTop = 0;
+}
+function back(){
+  ROUTE = hist.pop() || '#/';
+  render();
+  const sc = document.getElementById('screen'); if(sc) sc.scrollTop = 0;
+}
+
+function renderNav(cfg){
+  const n = document.getElementById('nav');
+  n.innerHTML =
+    (cfg.back ? '<div class="back" onclick="back()">‹</div>' : '') +
+    '<span>' + esc(cfg.title) + '</span>' +
+    '<div class="more">⋯</div>';
+}
+
+function shade(hex, pct){
+  const n = parseInt(hex.slice(1), 16);
+  let r=(n>>16)&255, g=(n>>8)&255, b=n&255;
+  const f = 1 + pct/100;
+  r=Math.max(0,Math.min(255,Math.round(r*f)));
+  g=Math.max(0,Math.min(255,Math.round(g*f)));
+  b=Math.max(0,Math.min(255,Math.round(b*f)));
+  return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+
+function cardHtml(p, mod){
+  const ico = ICON[p.id] || '📄';
+  const wait = (p.status||[]).includes('待上线');
+  const tg = wait ? '<span class="tag orange">待上线</span>' : '';
+  return '<div class="card" onclick="go(\'#/' + p.id + '\')">' + tg +
+    '<div class="ico" style="background:' + mod.color + '1A;color:' + mod.color + '">' + ico + '</div>' +
+    '<div class="tt">' + esc(p.title) + '</div>' +
+    '<div class="ds">' + esc(p.desc || '点击进入') + '</div></div>';
+}
+
+function row2(ico, title, sub, st, cls){
+  return '<div class="row"><div class="ri" style="background:#F5F5F7">' + ico + '</div>' +
+    '<div class="rb"><div class="rt">' + esc(title) + '</div><div class="rs">' + esc(sub) + '</div></div>' +
+    '<span class="tag inline ' + cls + '">' + esc(st) + '</span></div>';
+}
+
+// ============================================================
+function render(){
+  const screen = document.getElementById('screen');
+  const parts = ROUTE.replace(/^#\//,'').split('/').filter(Boolean);
+  const key = parts[0] || '';
+  if(!key){ renderHome(screen); return; }
+  const p = pageById(key);
+  if(!p){
+    renderNav({title:'未找到', back:true});
+    screen.innerHTML = '<div class="empty"><div class="ei">🧭</div>页面不存在<br>#' + esc(key) + '</div>';
+    return;
+  }
+  const mod = p._mod;
+  renderNav({title:p.title, back:true});
+  if(p.type === 'home') renderModHome(screen, mod, p);
+  else if(p.type === 'form') renderForm(screen, p, mod);
+  else if(p.type === 'list') renderList(screen, p, mod);
+  else renderDetail(screen, p, mod);
+}
+
+function renderHome(screen){
+  renderNav({title:'办公室综合服务平台', back:false});
+  let h = '<div class="home-hero">' +
+    '<div class="ttl">办公室综合服务平台</div>' +
+    '<div class="stl">中国工商银行苏州分行 · 综合服务统一入口</div>' +
+    '<div class="meta"><span>手机端工银e办公</span><span>PC端工银e办公</span><span>微信小程序</span></div></div>';
+  h += '<div class="mods">';
+  P.modules.forEach(m => {
+    h += '<div class="modcard" onclick="go(\'#/' + m.pages[0].id + '\')">' +
+      '<div class="mi" style="background:' + m.color + '">' + (MI[m.key]||'📄') + '</div>' +
+      '<div class="mt">' + esc(m.name) + '</div>' +
+      '<div class="md">' + m.functions.length + ' 项功能 · ' + esc(m.owner) + '</div>' +
+      '<div class="mc">' + esc(m.priority) + '</div></div>';
+  });
+  h += '</div>';
+  h += '<div class="sect-t">我的</div><div class="wrap"><div class="list">' +
+    '<div class="row"><div class="ri" style="background:#C8161E1A;color:#C8161E;border-radius:50%">' + MOCK.user.avatar + '</div>' +
+    '<div class="rb"><div class="rt">' + MOCK.user.name + '</div><div class="rs">' + MOCK.user.dept + ' · 按当前账号</div></div><span class="arrow">›</span></div>' +
+    '<div class="row"><div class="ri" style="background:#0E74901A;color:#0E7490">📋</div>' +
+    '<div class="rb"><div class="rt">我的申请/预约</div><div class="rs">查看全部记录与审批状态</div></div><span class="arrow">›</span></div>' +
+    '</div></div>';
+  h += '<div class="demo-note"><b>原型说明</b>：本页为可点击交互原型，供开发参考。数据均为演示数据，' +
+    '实际以行内系统为准。右下角 <b>ⓘ</b> 按钮可查看当前页面的规格说明（路由 / 字段 / 依赖 / 对接系统）。</div>';
+  h += '<div class="copyright">办公室综合服务平台 · 手机端原型 v0.1</div>';
+  screen.innerHTML = h;
+}
+
+function renderModHome(screen, m, p){
+  let h = '<div class="banner" style="background:linear-gradient(135deg,' + m.color + ' 0%,' + shade(m.color,-18) + ' 100%)">' +
+    '<h1>' + esc(m.name) + '</h1><p>' + esc(m.functions.slice(0,3).join(' · ')) + '</p></div>';
+  h += '<div class="sect-t">功能服务</div><div class="wrap"><div class="grid">';
+  m.pages.filter(x => x.type !== 'home').forEach(x => { h += cardHtml(x, m); });
+  h += '</div></div>';
+  h += '<div class="copyright">' + esc(m.name) + ' · 由' + esc(m.owner) + '负责</div>';
+  screen.innerHTML = h;
+}
+
+function tipFor(p){
+  const map = {
+    canteen_weekend_order:'填写周末用餐人数，便于食堂提前备餐。周末暂未开通线上支付，用餐时现场结算。',
+    canteen_menu:'点击日期可切换查看对应餐单。',
+    canteen_evaluation:'请对本次就餐的餐品与服务进行评分。',
+    life_haircut:'请选择日期与可约时段，按预约时间前往理发室。',
+    life_medical:'请选择就诊时段。如遇紧急不适，请直接前往医务室或就医。',
+    life_gym:'预约健身房开放场次，按场次入场锻炼。',
+    life_library:'预约阅览室座位使用时段，凭预约记录入座。',
+    visitor_register:'请填写访客信息，审批通过后凭二维码通行。',
+    office_item_apply:'物品申请提交后由办公室审批，对接现有系统。',
+    office_car_apply:'公车申请提交后由办公室审批，对接现有系统。',
+    office_meeting_apply:'会议室申请将链接至总行会议系统。',
+    office_tech_repair:'科技维修提交后由金融科技部处理，可实时查看进度。',
+    office_property_repair:'物业维修提交后由物业公司处理，可实时查看进度。',
+    data_feedback:'您的建议将直达分行管理部门，可查看回复。',
+    data_health_check:'每日健康打卡，记录个人健康状态。',
+    data_bind_card:'绑定卡用于餐饮、门禁等场景的身份识别（需先对接总行智慧餐饮）。',
+    mgmt_push:'推送内容将定向发送至指定范围员工。'
+  };
+  return esc(map[p.id] || '请按提示填写下方信息。');
+}
+
+function fieldHtml(f){
+  const name = typeof f === 'string' ? f : (f.label || f.name || '字段');
+  const type = typeof f === 'object' ? (f.type || 'text') : 'text';
+  const req  = typeof f === 'object' ? f.required : false;
+  const ph   = typeof f === 'object' ? (f.placeholder || '') : '';
+  const label = '<div class="flabel">' + (req ? '<em>*</em>' : '') + esc(name) + '</div>';
+
+  if(/人数|数量/.test(name))
+    return '<div class="fitem">' + label + '<div class="stepper" style="margin-left:auto"><button>−</button><span>12</span><button>＋</button></div></div>';
+  if(/日期|时间|时段/.test(name))
+    return '<div class="fitem">' + label + '<div class="fval">9月16日 周三<span class="farrow">›</span></div></div>';
+  if(/部门|机构|地点|车|类型|分类|餐次|场次|会议室|接待对象/.test(name))
+    return '<div class="fitem">' + label + '<div class="fval ph">请选择<span class="farrow">›</span></div></div>';
+  if(/备注|说明|意见|建议|原因|详情|描述|内容|事项|问题/.test(name) || type === 'textarea')
+    return '<div class="fitem" style="flex-direction:column;align-items:stretch">' +
+      '<div class="flabel" style="width:auto;margin-bottom:8px">' + (req?'<em>*</em>':'') + esc(name) + '</div>' +
+      '<div style="background:#F7F7F9;border-radius:9px;padding:10px;min-height:52px;font-size:13px;color:#C0C0C0">' +
+      esc(ph || '请填写' + name) + '</div></div>';
+  return '<div class="fitem">' + label + '<input class="finput" placeholder="' + esc(ph || '请输入' + name) + '"></div>';
+}
+
+function renderForm(screen, p, m){
+  let h = '';
+  if((p.status||[]).includes('待上线')){
+    h += '<div class="wrap"><div class="tip warn"><span class="ti">⏳</span><div><b>待上线</b>：本功能为一期规划，' +
+         esc(p.note || '需先对接总行智慧餐饮平台。') + '</div></div></div>';
+  } else {
+    h += '<div class="wrap"><div class="tip info"><span class="ti">ℹ️</span><div>' + tipFor(p) + '</div></div></div>';
+  }
+
+  if(p.id.startsWith('life_') && p.id !== 'life_home'){
+    h += '<div class="wrap"><div class="list" style="margin-bottom:12px">' +
+      '<div class="row"><div class="ri" style="background:' + m.color + '1A;color:' + m.color + '">📋</div>' +
+      '<div class="rb"><div class="rt">我的预约</div></div><span class="arrow">›</span></div></div></div>';
+  }
+
+  h += '<div class="wrap"><div class="form">';
+  (p.fields||[]).forEach(f => { h += fieldHtml(f); });
+  h += '</div></div>';
+
+  if(MOCK.slots[p.id]){
+    h += '<div class="sect-t">选择时段</div><div class="wrap"><div class="slots">';
+    const off = MOCK.slotOff[p.id] || [], on = MOCK.slotOn[p.id];
+    MOCK.slots[p.id].forEach((s,i) => {
+      const cls = off.includes(i) ? 'off' : (i === on ? 'on' : '');
+      h += '<div class="slot ' + cls + '">' + esc(s) + '</div>';
+    });
+    h += '</div></div>';
+  }
+
+  if(p.id === 'canteen_menu'){
+    h += '<div class="wrap"><div class="form" style="margin-bottom:12px"><div class="fitem">' +
+      '<div class="flabel" style="width:auto;flex:1">今日 · 9月16日 周三</div>' +
+      '<div class="fval" style="color:#8A8A8A;font-size:12px">点击可切换查看日期<span class="farrow">›</span></div></div></div></div>';
+    h += '<div class="wrap" style="margin-bottom:12px"><div class="slots" style="grid-template-columns:repeat(3,1fr)">' +
+      '<div class="slot">早餐</div><div class="slot on">午餐</div><div class="slot">晚餐</div></div></div>';
+    Object.keys(MOCK.menu).forEach(cat => {
+      h += '<div class="wrap"><div class="form" style="margin-bottom:10px">' +
+        '<div class="fitem"><div class="flabel" style="color:' + P.colors['餐饮服务'] + ';font-weight:600;width:auto;flex:1">' + esc(cat) + '</div></div>';
+      MOCK.menu[cat].forEach(it => {
+        h += '<div class="fitem"><div class="flabel" style="width:auto;flex:1">' + esc(it[0]) + '</div>' +
+          '<div class="fval" style="color:' + P.colors['餐饮服务'] + ';font-weight:600">' + it[1].toFixed(1) + '</div></div>';
+      });
+      h += '</div></div>';
+    });
+  }
+
+  if(p.id === 'canteen_evaluation'){
+    h += '<div class="sect-t">餐品评分</div><div class="wrap"><div class="form">';
+    [['红烧肉',3],['糖醋里脊',4],['清炒时蔬',3],['番茄蛋花汤',4]].forEach(it => {
+      h += '<div class="fitem"><div class="flabel" style="width:auto;flex:1">' + it[0] + '</div>' +
+        '<div class="fval" style="color:#F5A623;letter-spacing:2px">' + '★'.repeat(it[1]) +
+        '<span style="color:#E0E0E0">' + '★'.repeat(5-it[1]) + '</span></div></div>';
+    });
+    h += '</div></div>';
+    h += '<div class="sect-t">整体服务</div><div class="wrap"><div class="form">' +
+      '<div class="fitem" style="flex-direction:column;align-items:center;padding:18px">' +
+      '<div style="font-size:28px;color:#F5A623;letter-spacing:4px">★★★★★</div>' +
+      '<div style="font-size:11.5px;color:#8A8A8A;margin-top:8px">点击星星评价本次就餐服务</div></div></div></div>';
+  }
+
+  if(p.id.startsWith('life_') && p.id !== 'life_home' && p.id !== 'life_parking'){
+    h += '<div class="wrap"><div class="form" style="margin-top:12px"><div class="fitem">' +
+      '<div style="width:34px;height:34px;border-radius:50%;background:' + m.color + ';color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;margin-right:11px;flex:0 0 34px">' + MOCK.user.avatar + '</div>' +
+      '<div class="rb"><div class="rt" style="font-size:14px">' + MOCK.user.name + '</div><div class="rs">' + MOCK.user.dept + '</div></div>' +
+      '<span class="tag green">按当前账号</span></div></div></div>';
+  }
+
+  const btnTxt = p.id === 'canteen_weekend_order' ? '提交报备'
+    : p.id === 'canteen_evaluation' ? '提交评价'
+    : p.id.startsWith('life_') ? '提交预约'
+    : p.id === 'visitor_register' ? '提交登记' : '提交申请';
+  const disabled = (p.status||[]).includes('待上线') || (p.status||[]).includes('规划中');
+  h += '<button class="submit"' + (disabled ? ' disabled' : ' onclick="toast(\'' + esc(p.title) + '已提交（原型演示）\')"') + '>' + btnTxt + '</button>';
+  h += '<div class="copyright">' + esc(m.name) + ' · 由' + esc(m.owner) + '负责</div>';
+  screen.innerHTML = h;
+}
+
+function renderList(screen, p, m){
+  let h = '<div class="wrap">';
+  const sts = p.status || [];
+  if(sts.length){
+    h += '<div style="display:flex;gap:8px;margin-bottom:12px;overflow-x:auto">';
+    sts.forEach((s,i) => {
+      h += '<div style="flex:0 0 auto;padding:6px 14px;border-radius:15px;font-size:12.5px;' +
+        (i===0 ? 'background:' + m.color + ';color:#fff' : 'background:#fff;color:#666;border:1px solid #E8E8E8') +
+        '">' + esc(s) + '</div>';
+    });
+    h += '</div>';
+  }
+  if(p.id === 'mgmt_stats'){
+    h += '<div class="stat-row">' +
+      '<div class="stat"><div class="n">32</div><div class="l">功能点</div></div>' +
+      '<div class="stat"><div class="n">1,286</div><div class="l">本月服务人次</div></div>' +
+      '<div class="stat"><div class="n">96.4%</div><div class="l">按时办结率</div></div></div>';
+    h += '<div class="form" style="padding:6px 15px">';
+    [['餐饮服务',86,'#C8161E'],['生活预约',64,'#0F8A5F'],['办公保障',72,'#0E7490'],['门禁访客',41,'#1E5AA8'],['数据采集',58,'#6D4AA8']].forEach(b => {
+      h += '<div class="bar-row"><div class="bl">' + b[0] + '</div><div class="bt"><div class="bf" style="width:' + b[1] + '%;background:' + b[2] + '"></div></div><div class="bv">' + b[1] + '%</div></div>';
+    });
+    h += '</div><div style="font-size:11.5px;color:#8A8A8A;padding:0 4px">口径：各模块服务响应率（演示数据）。支撑后勤管理决策。</div>';
+  } else if(p.id === 'mgmt_inspection'){
+    h += '<div class="list">' +
+      row2('🔍','配电房巡检','今日 09:00 · 物业组','待执行','orange') +
+      row2('🔍','消防通道检查','今日 14:00 · 安保组','执行中','blue') +
+      row2('🔍','食堂卫生检查','昨日 16:30 · 劳服公司','已完成','green') +
+      row2('🔍','电梯年检','9月14日 · 物业组','已完成','green') + '</div>';
+  } else if(p.id === 'mgmt_attendance'){
+    h += '<div class="list">' +
+      row2('🗓️','物业保洁组','在岗 12 / 应到 12','已记录','green') +
+      row2('🗓️','物业安保组','在岗 8 / 应到 9','已记录','green') +
+      row2('🗓️','劳服食堂组','在岗 6 / 应到 6','已记录','green') +
+      row2('🗓️','劳服服务组','在岗 4 / 应到 5','已记录','green') + '</div>';
+  } else if(p.id === 'access_log'){
+    h += '<div class="list">' +
+      row2('🚪','张三 · 金融科技部','今日 08:42 · 一楼人行通道','正常','green') +
+      row2('🚪','李四 · 办公室','今日 08:37 · 三楼电梯厅','正常','green') +
+      row2('🚪','王五 · 访客','今日 10:15 · 一楼访客通道','正常','green') +
+      row2('🚪','未知卡号','今日 02:31 · 一楼人行通道','异常','red') + '</div>';
+  } else if(p.id === 'visitor_list'){
+    h += '<div class="list">' +
+      row2('📋','王五（来访：某某科技）','9月16日 10:15 入 · 待离场','进行中','blue') +
+      row2('📋','赵六（来访：设备维保）','9月16日 09:20 入 · 11:05 离','已完成','green') +
+      row2('📋','孙七（来访：合作洽谈）','9月15日 14:00 入 · 16:30 离','已完成','green') + '</div>';
+  } else if(p.id === 'data_parking_mgmt'){
+    h += '<div class="empty"><div class="ei">🅿️</div>车位管理功能规划中<br><span style="font-size:12px">三期规划，暂未开放</span></div>';
+  } else {
+    h += '<div class="empty"><div class="ei">📋</div>暂无记录</div>';
+  }
+  h += '</div><div class="copyright">' + esc(m.name) + ' · 由' + esc(m.owner) + '负责</div>';
+  screen.innerHTML = h;
+}
+
+function renderDetail(screen, p, m){
+  let h = '<div class="wrap">';
+  h += '<div class="tip info"><span class="ti">ℹ️</span><div>' + tipFor(p) + '</div></div>';
+  if(p.id === 'canteen_dining'){
+    h += '<div class="list">' +
+      row2('🍚','食堂用餐','扫码/刷卡进入食堂 · 3个食堂点位','已上线','green') +
+      row2('📋','餐单查询','查看每日/每周餐单','已上线','green') +
+      row2('🥟','面点卤菜预订','跳转总行智慧餐饮平台','待上线','orange') + '</div>';
+  } else if(p.id === 'data_e_pay'){
+    h += '<div class="stat-row"><div class="stat"><div class="n">328.50</div><div class="l">余额（元）</div></div>' +
+      '<div class="stat"><div class="n">12</div><div class="l">本月笔数</div></div>' +
+      '<div class="stat"><div class="n">486.00</div><div class="l">本月消费</div></div></div>' +
+      '<div class="list">' + row2('💰','食堂消费','9月16日 12:03','-18.00','gray') +
+      row2('💰','咖啡西点','9月15日 15:20','-22.00','gray') +
+      row2('💰','账户充值','9月10日 09:00','+500.00','green') + '</div>';
+  } else if(p.id === 'data_digital_rmb'){
+    h += '<div class="tip green"><span class="ti">🪙</span><div>数字人民币可用于食堂、咖啡西点消费，需先在总行智慧餐饮平台完成钱包绑定。</div></div>' +
+      '<div class="list">' + row2('🪙','数币钱包','已开通 · 尾号 8823','已绑定','green') +
+      row2('🪙','开通状态','需先对接总行智慧餐饮平台','已上线','green') + '</div>';
+  } else if(p.id === 'data_hr_sync'){
+    h += '<div class="list">' +
+      row2('👥','组织架构','已同步 · 24个部门','已同步','green') +
+      row2('👥','人员信息','已同步 · 386人','已同步','green') +
+      row2('👥','用户授权体系','按部门/角色配置功能可见范围','已同步','green') + '</div>' +
+      '<div style="font-size:11.5px;color:#8A8A8A;padding:10px 4px">说明：面向分行管理，据各功能模块建立清晰的用户授权体系。</div>';
+  } else if(p.id === 'mgmt_stats'){ renderList(screen, p, m); return; }
+  else {
+    h += '<div class="empty"><div class="ei">' + (ICON[p.id]||'📄') + '</div>页面开发中</div>';
+  }
+  h += '</div><div class="copyright">' + esc(m.name) + ' · 由' + esc(m.owner) + '负责</div>';
+  screen.innerHTML = h;
+}
+
+function toast(msg){
+  const d = document.createElement('div');
+  d.textContent = msg;
+  d.style.cssText = 'position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);background:rgba(0,0,0,.78);color:#fff;padding:11px 20px;border-radius:10px;font-size:13.5px;z-index:200;max-width:76%;text-align:center;line-height:1.5';
+  document.getElementById('phone').appendChild(d);
+  setTimeout(() => d.remove(), 1800);
+}
+
+function openSpec(){
+  const parts = ROUTE.replace(/^#\//,'').split('/').filter(Boolean);
+  const p = pageById(parts[0]);
+  const box = document.getElementById('specbox');
+  if(!p){
+    box.innerHTML = '<h3>📘 平台规格</h3>' +
+      kv('平台', P.platform.name) + kv('单位', P.platform.org) +
+      kv('入口渠道', P.platform.endpoints.join('、')) +
+      kv('模块数', P.modules.length + ' 个') + kv('功能点', '32 项') +
+      kv('原型页面', allPages().length + ' 页');
+  } else {
+    const m = p._mod;
+    box.innerHTML = '<h3>📘 ' + esc(p.title) + '</h3>' +
+      kv('模块', m.name) + kv('路由', '#/' + p.id) +
+      kv('页面类型', ({home:'模块首页',form:'表单页',list:'列表页',detail:'详情页'})[p.type] || p.type) +
+      kv('端', '手机端') + kv('服务对象', p.audience || '全体员工') +
+      kv('牵头/协同', m.owner) + kv('优先级', m.priority) +
+      kv('状态', (p.status||[]).join(' / ') || '—') +
+      kv('依赖', p.deps || '—') + kv('对接系统', p.systems || '—') +
+      kv('字段', (p.fields||[]).map(f => typeof f==='string'?f:(f.label||f.name)).join('、') || '—') +
+      (p.note ? kv('备注', p.note) : '');
+  }
+  document.getElementById('spec').classList.add('on');
+}
+function kv(k, v){
+  return '<div class="kv"><div class="kk">' + esc(k) + '</div><div class="vv">' + esc(v) + '</div></div>';
+}
+function closeSpec(){ document.getElementById('spec').classList.remove('on'); }
+
+window.addEventListener('hashchange', () => {
+  const r = location.hash || '#/';
+  if(r !== ROUTE){ ROUTE = r; render(); }
+});
+document.addEventListener('DOMContentLoaded', () => {
+  ROUTE = location.hash || '#/';
+  render();
+});
+
+</script>
+</body>
+</html>
