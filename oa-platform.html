@@ -2650,6 +2650,182 @@ function renderMenu(){
   return h;
 }
 
+
+// ============ 预约选择器（点击弹出）============
+const BOOK = {};            // {pageId: {date:'2026-09-18', slot:'09:00-09:30'}}
+let PICKER = null;          // 当前弹出的选择器 {type,pageId,title,items,anchor}
+
+const SLOT_LIB = {
+  life_haircut:  ['09:00–09:30','09:30–10:00','10:00–10:30','10:30–11:00','11:00–11:30',
+                  '14:00–14:30','14:30–15:00','15:00–15:30','15:30–16:00'],
+  life_medical:  ['09:00–09:30','09:30–10:00','10:00–10:30','10:30–11:00',
+                  '14:00–14:30','14:30–15:00','15:00–15:30'],
+  life_gym:      ['09:00–10:00','10:00–11:00','12:00–13:00','13:00–14:00',
+                  '17:00–18:00','18:00–19:00','19:00–20:00'],
+  life_library:  ['09:00–10:30','10:30–12:00','12:00–13:30','14:00–15:30','15:30–17:00'],
+  office_meeting_apply:   ['08:30–10:00','10:00–11:30','13:30–15:00','15:00–16:30','16:30–18:00'],
+  office_car_apply:       ['全天用车','上午用车（08:00–12:00）','下午用车（13:00–18:00）'],
+  office_reception_apply: ['午餐接待（11:30–13:00）','晚餐接待（17:30–19:30）','座谈交流（15:00–16:30）'],
+  office_overtime_apply:  ['17:30–19:00','18:00–20:00','19:00–21:00','周末全天'],
+  office_dining:          ['早餐（07:00–08:30）','午餐（11:30–12:30）','晚餐（17:30–18:30）']
+};
+
+function _pad(n){ return n < 10 ? '0' + n : '' + n; }
+function _dateList(){
+  const out = [], WK = ['日','一','二','三','四','五','六'];
+  const base = new Date(2026, 8, 17);   // 2026-09-17 为"今天"
+  for(let i = 0; i < 14; i++){
+    const d = new Date(base.getTime() + i * 86400000);
+    const mm = d.getMonth() + 1, dd = d.getDate();
+    let lb;
+    if(i === 0) lb = '今天';
+    else if(i === 1) lb = '明天';
+    else if(i === 2) lb = '后天';
+    else lb = '周' + WK[d.getDay()];
+    out.push({val: d.getFullYear() + '-' + _pad(mm) + '-' + _pad(dd),
+              lb: mm + '月' + dd + '日', sub: lb});
+  }
+  return out;
+}
+
+function openPicker(type, pageId){
+  const cur = BOOK[pageId] || {};
+  let items, title;
+  if(type === 'date'){
+    title = '选择预约日期';
+    items = _dateList().map(x => ({val: x.val, lb: x.lb, sub: x.sub, sel: cur.date === x.val}));
+  } else {
+    title = '选择预约时段';
+    const list = SLOT_LIB[pageId] || ['09:00–10:00','10:00–11:00','14:00–15:00','15:00–16:00'];
+    // 模拟约满：每页第 2 个和第 5 个
+    items = list.map((x, i) => ({val: x, lb: x, sub: (i === 1 || i === 4) ? '已约满' : '', sel: cur.slot === x,
+                                 dis: (i === 1 || i === 4)}));
+  }
+  PICKER = {type: type, pageId: pageId, title: title, items: items};
+  renderPicker();
+}
+
+function pickItem(val){
+  if(!PICKER) return;
+  const it = PICKER.items.find(x => x.val === val);
+  if(it && it.dis) return;
+  if(PICKER.type === 'dept'){ pickDept(val); return; }
+  const pid = PICKER.pageId;
+  BOOK[pid] = BOOK[pid] || {};
+  BOOK[pid][PICKER.type] = val;
+  closePicker();
+  render();
+  const sc = document.getElementById('screen'); if(sc) sc.scrollTop = sc.scrollTop;
+}
+
+function closePicker(){
+  PICKER = null;
+  const el = document.getElementById('picker');
+  if(el) el.remove();
+}
+
+function renderPicker(){
+  let el = document.getElementById('picker');
+  if(el) el.remove();
+  if(!PICKER) return;
+  el = document.createElement('div');
+  el.id = 'picker';
+  el.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,.42);z-index:120;display:flex;align-items:flex-end';
+  el.onclick = e => { if(e.target === el) closePicker(); };
+  let h = '<div style="width:100%;max-height:62%;background:#fff;border-radius:16px 16px 0 0;overflow:hidden;display:flex;flex-direction:column">';
+  h += '<div style="padding:14px 16px 10px;border-bottom:1px solid #F0F0F0;display:flex;align-items:center;justify-content:space-between">' +
+       '<span style="font-size:15px;font-weight:600;color:#222">' + PICKER.title + '</span>' +
+       '<span onclick="closePicker()" style="font-size:20px;color:#B0B0B0;line-height:1;cursor:pointer">×</span></div>';
+  h += '<div style="overflow-y:auto;-webkit-overflow-scrolling:touch">';
+  PICKER.items.forEach((x, i) => {
+    const dis = x.dis ? 'opacity:.38' : '';
+    const col = x.sel ? '#C7000B' : '#333';
+    h += '<div onclick="pickItem(\'' + x.val + '\')" style="padding:13px 16px;display:flex;align-items:center;' +
+         'justify-content:space-between;border-bottom:1px solid #F7F7F7;cursor:pointer;' + dis + '">' +
+         '<span style="font-size:14.5px;color:' + col + '">' + x.lb + '</span>' +
+         '<span style="font-size:12px;color:' + (x.dis ? '#C0C0C0' : '#9A9A9A') + '">' + (x.sub || '') +
+         (x.sel ? ' <span style="color:#C7000B;font-weight:700">✓</span>' : '') + '</span></div>';
+  });
+  h += '</div></div>';
+  el.innerHTML = h;
+  document.getElementById('phone').appendChild(el);
+}
+
+// 字段点击：日期 / 时段
+function bookField(kind, pageId, label){
+  openPicker(kind, pageId);
+}
+
+function bookVal(pageId, kind){
+  const b = BOOK[pageId] || {};
+  return b[kind] || '';
+}
+
+// 预约提交
+function submitBook(pageId){
+  const b = BOOK[pageId] || {};
+  if(!b.date){ toast('请先选择预约日期'); return; }
+  if(!b.slot){ toast('请选择预约时段'); return; }
+  toast('预约成功：' + b.date + ' ' + b.slot);
+}
+
+
+// ============ 填报部门（带虚拟短号）============
+const DEPTS = [
+  {name:'办公室',       tel:'8301',  ext:'111'},
+  {name:'人力资源部',   tel:'8302',  ext:'222'},
+  {name:'金融科技部',   tel:'8303',  ext:'333'},
+  {name:'机构业务部',   tel:'8305',  ext:'555'},
+  {name:'公司金融部',   tel:'8306',  ext:'666'},
+  {name:'个人金融部',   tel:'8307',  ext:'777'},
+  {name:'风险管理部',   tel:'8308',  ext:'888'},
+  {name:'财务会计部',   tel:'8309',  ext:'999'},
+  {name:'运营管理部',   tel:'8310',  ext:'110'},
+  {name:'纪委办公室',   tel:'8311',  ext:'120'},
+  {name:'工会办公室',   tel:'8312',  ext:'130'},
+  {name:'劳服公司',     tel:'8313',  ext:'150'},
+  {name:'太仓分行',     tel:'8315',  ext:'215'},
+  {name:'昆山分行',     tel:'8316',  ext:'216'},
+  {name:'常熟分行',     tel:'8317',  ext:'217'},
+  {name:'张家港分行',   tel:'8318',  ext:'218'},
+  {name:'吴江分行',     tel:'8319',  ext:'219'},
+  {name:'相城支行',     tel:'8320',  ext:'220'}
+];
+
+const DEPT_PICK = {};   // {pageId: deptIndex}
+
+function openDeptPicker(pageId){
+  PICKER = {
+    type: 'dept', pageId: pageId, title: '选择填报部门',
+    items: DEPTS.map((d, i) => ({
+      val: String(i),
+      lb: d.name,
+      sub: '短号 ' + d.tel + ' 转 ' + d.ext,
+      sel: DEPT_PICK[pageId] === i
+    }))
+  };
+  renderPicker();
+}
+
+function pickDept(idxStr){
+  const i = parseInt(idxStr, 10);
+  const pid = PICKER.pageId;
+  DEPT_PICK[pid] = i;
+  closePicker();
+  render();
+}
+
+function deptName(pageId){
+  const i = DEPT_PICK[pageId];
+  return (i === undefined || i === null) ? '' : DEPTS[i].name;
+}
+function deptTel(pageId){
+  const i = DEPT_PICK[pageId];
+  if(i === undefined || i === null) return '';
+  const d = DEPTS[i];
+  return d.tel + ' 转 ' + d.ext;
+}
+
 function cardHtml(p, mod){
   const ico = SVG_ICON[p.id] || SVG_ICON.canteen_menu;
   const wait = (p.status||[]).includes('待上线');
@@ -2873,7 +3049,20 @@ function fieldHtml(f){
     return '<div class="fitem">' + label + '<div class="stepper" style="margin-left:auto"><button>−</button><span>12</span><button>＋</button></div></div>';
   if(/日期|时间|时段/.test(name))
     return '<div class="fitem">' + label + '<div class="fval">9月16日 周三<span class="farrow">›</span></div></div>';
-  if(/部门|机构|地点|车|类型|分类|餐次|场次|会议室|接待对象/.test(name))
+  if(/填报部门|^部门$|所在部门|申请部门/.test(name)){
+    const pid = f._pid || '';
+    const cur = deptName(pid);
+    return '<div class="fitem" onclick="openDeptPicker(\'' + pid + '\')" style="cursor:pointer">' + label +
+      '<div class="fval' + (cur ? '' : ' ph') + '" style="text-align:right">' + (cur || '请选择') +
+      '<span class="farrow">›</span></div></div>';
+  }
+  if(/联系电话|电话/.test(name)){
+    const pid = f._pid || '';
+    const t = deptTel(pid);
+    return '<div class="fitem">' + label +
+      '<div class="fval' + (t ? '' : ' ph') + '" style="text-align:right">' + (t || '选择部门后自动带出') + '</div></div>';
+  }
+  if(/机构|地点|车|类型|分类|餐次|场次|会议室|接待对象/.test(name))
     return '<div class="fitem">' + label + '<div class="fval ph">请选择<span class="farrow">›</span></div></div>';
   if(/备注|说明|意见|建议|原因|详情|描述|内容|事项|问题/.test(name) || type === 'textarea')
     return '<div class="fitem" style="flex-direction:column;align-items:stretch">' +
@@ -2892,23 +3081,38 @@ function renderForm(screen, p, m){
     h += '<div class="wrap"><div class="tip info"><span class="ti">ℹ️</span><div>' + tipFor(p) + '</div></div></div>';
   }
 
-  if(p.id.startsWith('life_') && p.id !== 'life_home'){
-    h += '<div class="wrap"><div class="list" style="margin-bottom:12px">' +
-      '<div class="row"><div class="ri" style="background:' + m.color + '1A;color:' + m.color + '">📋</div>' +
-      '<div class="rb"><div class="rt">我的预约</div></div><span class="arrow">›</span></div></div></div>';
-  }
+  // 我的预约入口已移入页面统一处理，避免与表单区重复
 
+  const BOOK_PAGES = ['life_haircut','life_medical','life_gym','life_library',
+                      'office_meeting_apply','office_car_apply','office_reception_apply',
+                      'office_overtime_apply','office_dining'];
+  const isBook = BOOK_PAGES.indexOf(p.id) >= 0;
   h += '<div class="wrap"><div class="form">';
-  (p.fields||[]).forEach(f => { h += fieldHtml(f); });
+  (p.fields||[]).forEach(f => {
+    // 预约类页面：跳过自带字段（由下面的"预约信息"区统一处理）
+    if(isBook) return;
+    // 附带 pageId，供部门/电话字段联动
+    let ff = f;
+    if(typeof f === 'object' && f) { ff = Object.assign({}, f, {_pid: p.id}); }
+    h += fieldHtml(ff);
+  });
   h += '</div></div>';
 
-  if(MOCK.slots[p.id]){
-    h += '<div class="sect-t">选择时段</div><div class="wrap"><div class="slots">';
-    const off = MOCK.slotOff[p.id] || [], on = MOCK.slotOn[p.id];
-    MOCK.slots[p.id].forEach((s,i) => {
-      const cls = off.includes(i) ? 'off' : (i === on ? 'on' : '');
-      h += '<div class="slot ' + cls + '">' + esc(s) + '</div>';
-    });
+  // ===== 预约选择（点击弹出日期/时段）=====
+  const NEED_BOOK = ['life_haircut','life_medical','life_gym','life_library',
+                     'office_meeting_apply','office_car_apply','office_reception_apply',
+                     'office_overtime_apply','office_dining'];
+  if(NEED_BOOK.indexOf(p.id) >= 0){
+    const bd = bookVal(p.id, 'date'), bs = bookVal(p.id, 'slot');
+    h += '<div class="sect-t">预约信息</div><div class="wrap"><div class="form">';
+    h += '<div class="fitem" onclick="bookField(\'date\',\'' + p.id + '\',\'日期\')" style="cursor:pointer">' +
+         '<div class="flabel" style="width:auto;flex:0 0 74px">预约日期</div>' +
+         '<div class="fval" style="flex:1;text-align:right;color:' + (bd ? '#222' : '#B0B0B0') + '">' +
+         (bd || '请选择') + '　<span style="color:#C0C0C0">›</span></div></div>';
+    h += '<div class="fitem" onclick="bookField(\'slot\',\'' + p.id + '\',\'时段\')" style="cursor:pointer">' +
+         '<div class="flabel" style="width:auto;flex:0 0 74px">预约时段</div>' +
+         '<div class="fval" style="flex:1;text-align:right;color:' + (bs ? '#222' : '#B0B0B0') + '">' +
+         (bs || '请选择') + '　<span style="color:#C0C0C0">›</span></div></div>';
     h += '</div></div>';
   }
 
@@ -2939,7 +3143,13 @@ function renderForm(screen, p, m){
     : p.id.startsWith('life_') ? '提交预约'
     : p.id === 'visitor_register' ? '提交登记' : '提交申请';
   const disabled = (p.status||[]).includes('待上线') || (p.status||[]).includes('规划中');
-  h += '<button class="submit"' + (disabled ? ' disabled' : ' onclick="toast(\'' + esc(p.title) + '已提交（原型演示）\')"') + '>' + btnTxt + '</button>';
+  const isBookPage = ['life_haircut','life_medical','life_gym','life_library',
+                      'office_meeting_apply','office_car_apply','office_reception_apply',
+                      'office_overtime_apply','office_dining'].indexOf(p.id) >= 0;
+  const act = isBookPage
+    ? 'submitBook(\'' + p.id + '\')'
+    : 'toast(\'' + esc(p.title) + '已提交（原型演示）\')';
+  h += '<button class="submit"' + (disabled ? ' disabled' : ' onclick="' + act + '"') + '>' + btnTxt + '</button>';
   h += '<div class="copyright">' + esc(m.name) + ' · 由' + esc(m.owner) + '负责</div>';
   screen.innerHTML = h;
 }
