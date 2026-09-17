@@ -105,6 +105,7 @@ body{
   padding:8px 2px 14px;cursor:pointer;transition:transform .12s;
 }
 .kk:active{transform:scale(.93);}
+.kk .ki svg{width:24px;height:24px;display:block;}
 .kk .ic{
   width:44px;height:44px;border-radius:50%;display:flex;align-items:center;
   justify-content:center;font-size:21px;position:relative;
@@ -2252,6 +2253,299 @@ const MOCK = {
   slotOn:  {life_haircut:0, life_medical:1, life_gym:1, life_library:2}
 };
 
+const WEEK_MENU = {
+ "早餐": {
+  "周一": [
+   "手抓饼（明档）",
+   "米兰虾饼",
+   "绿豆酥",
+   "梅干菜饼",
+   "鲜肉包",
+   "香菇菜包",
+   "花卷",
+   "刀切",
+   "香酥大饼",
+   "面条",
+   "油条",
+   "煎鸡蛋",
+   "白煮蛋",
+   "小米粥",
+   "白粥",
+   "豆浆",
+   "玉米",
+   "酱菜"
+  ],
+  "周二": [
+   "翡翠时蔬卷（明档）",
+   "鲜肉荠菜卷",
+   "红桂花米糕",
+   "黄油酥筒",
+   "鲜肉包",
+   "香菇菜包",
+   "花卷",
+   "刀切",
+   "香酥大饼",
+   "面条",
+   "油条",
+   "煎鸡蛋",
+   "茶叶蛋",
+   "南瓜粥",
+   "白粥",
+   "豆浆",
+   "毛芋",
+   "酱菜"
+  ],
+  "周三": [
+   "牛肉饼（明档）",
+   "苏式月饼",
+   "鲜肉小笼包",
+   "绿茶饼",
+   "鲜肉包",
+   "香菇菜包",
+   "花卷",
+   "刀切",
+   "香酥大饼",
+   "面条",
+   "油条",
+   "煎鸡蛋",
+   "白煮蛋",
+   "小米粥",
+   "白粥",
+   "豆浆",
+   "贝贝南瓜",
+   "酱菜"
+  ],
+  "周四": [
+   "玉米虾仁开口笑（明档）",
+   "芝麻酥饼",
+   "牛肉饼（辣）",
+   "港式虾饺",
+   "鲜肉包",
+   "香菇菜包",
+   "花卷",
+   "刀切",
+   "香酥大饼",
+   "面条",
+   "油条",
+   "煎鸡蛋",
+   "茶叶蛋",
+   "红豆粥",
+   "白粥",
+   "豆浆",
+   "紫薯",
+   "酱菜"
+  ],
+  "周五": [
+   "肉夹馍（明档）",
+   "鸡蛋饼",
+   "葱烧大饼",
+   "红豆酥",
+   "鲜肉包",
+   "香菇菜包",
+   "花卷",
+   "刀切",
+   "香酥大饼",
+   "面条",
+   "油条",
+   "煎鸡蛋",
+   "白煮蛋",
+   "小米粥",
+   "白粥",
+   "豆浆",
+   "马蹄",
+   "酱菜"
+  ]
+ },
+ "午餐": {
+  "周一": [
+   "麻辣烫（明档）",
+   "红烧羊肉",
+   "汤面",
+   "牛肉炒饭",
+   "家常红烧肉",
+   "脆皮烤鸡腿",
+   "番茄炒蛋",
+   "青椒毛豆肉丝",
+   "糟溜鱼片",
+   "冬瓜烧扁尖",
+   "家常豆腐",
+   "生菜",
+   "杂粮",
+   "水果",
+   "酸奶",
+   "酸梅汤",
+   "刀切",
+   "花卷",
+   "海带肉丝汤"
+  ],
+  "周二": [
+   "南昌拌粉（明档）",
+   "周庄苋菜竹笋",
+   "馄饨",
+   "小排砂锅",
+   "红烧狮子头",
+   "家常烧鱼块",
+   "宫保鸡丁",
+   "药芹炒肉丝",
+   "浇汁茄盒",
+   "红烧百叶结",
+   "蒜泥蒸茄子",
+   "小白菜",
+   "杂粮",
+   "水果",
+   "酸奶",
+   "绿豆汤",
+   "刀切",
+   "花卷",
+   "紫菜蛋汤"
+  ],
+  "周三": [
+   "兰州牛肉拉面（明档）",
+   "东北酱大骨",
+   "水饺",
+   "白菜年糕",
+   "香酥大排",
+   "豉油鸡",
+   "酱油炖蛋",
+   "什锦青虾仁",
+   "笋瓜肉片",
+   "甜蜜南瓜",
+   "长豇豆",
+   "苋菜",
+   "杂粮",
+   "水果",
+   "酸奶",
+   "酸梅汤",
+   "刀切",
+   "花卷",
+   "平菇豆腐汤"
+  ],
+  "周四": [
+   "鸡排饭（明档）",
+   "鲜茴香炒蛋",
+   "皮蛋瘦肉粥",
+   "插花牛肉汤",
+   "蒜泥白肉",
+   "剁椒昂刺鱼",
+   "蒜苔猪心",
+   "香辣翅根",
+   "土豆炒肉片",
+   "拍蒜黄瓜",
+   "雪菜黄豆芽",
+   "菠菜",
+   "杂粮",
+   "水果",
+   "酸奶",
+   "绿豆汤",
+   "刀切",
+   "花卷",
+   "雪菜蛋汤"
+  ],
+  "周五": [
+   "干煎馄饨",
+   "牛肉丸粉丝（明档）",
+   "肚包鸡",
+   "羊肉汤面",
+   "萝卜烧牛腩",
+   "苏式酱鸭",
+   "鱼香肉丝",
+   "银鱼炖蛋",
+   "回锅肉",
+   "榨菜粉皮",
+   "土烧萝卜",
+   "小青菜",
+   "杂粮",
+   "水果",
+   "酸奶",
+   "酸梅汤",
+   "刀切",
+   "花卷",
+   "咸肉冬瓜汤"
+  ]
+ },
+ "晚餐": {
+  "周一": [
+   "干煎水饺（明档）",
+   "发财元宝骨",
+   "剁椒鲳鱼",
+   "茭白肉片",
+   "酸豇豆鸡杂",
+   "韭菜炒虾干",
+   "丝瓜面筋",
+   "有机花菜",
+   "上海青",
+   "蛋炒饭",
+   "番茄蛋汤",
+   "米饭"
+  ],
+  "周二": [
+   "牛杂粉丝（明档）",
+   "走油肉",
+   "红烧鸭腿",
+   "京葱炒蛋",
+   "咕咾肉",
+   "白菜肉丝",
+   "青椒水面筋",
+   "韭菜绿豆芽",
+   "油麦菜",
+   "绿豆粥",
+   "平菇肉丝汤",
+   "米饭"
+  ],
+  "周三": [
+   "红汤馄饨（明档）",
+   "红烧猪爪",
+   "苏式熏鱼",
+   "油面筋塞肉",
+   "莴笋炒鸡片",
+   "鱼香肉丝",
+   "雪菜百叶",
+   "蒜泥西兰花",
+   "空心菜",
+   "青菜饭",
+   "榨菜蛋汤",
+   "米饭"
+  ],
+  "周四": [
+   "豌杂面（明档）",
+   "萝卜小排",
+   "奥尔良翅中",
+   "杭椒肉柳",
+   "西葫芦炒蛋",
+   "刀豆炒肉片",
+   "葱油腐竹",
+   "酸辣藕片",
+   "鸡毛菜",
+   "红豆粥",
+   "荠菜豆腐羹",
+   "米粉"
+  ],
+  "周五": [
+   "番茄肥牛锅（明档）",
+   "剁椒蒸德蹄",
+   "红烧鳊鱼",
+   "小酥肉",
+   "三鲜蹄筋",
+   "韭黄炒肉丝",
+   "木耳金针菇",
+   "青椒香干",
+   "紫角叶",
+   "绿豆粥",
+   "雪菜蛋汤",
+   "米饭"
+  ]
+ },
+ "夜宵": {
+  "每日": [
+   "奥灶面",
+   "粥",
+   "泡泡馄饨",
+   "关东煮",
+   "点心（每日两种）"
+  ]
+ }
+};
+
 let ROUTE = '#/';
 let hist = [];
 
@@ -2302,6 +2596,60 @@ function shade(hex, pct){
   return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
 }
 
+
+// ============ 食堂周菜单（真实菜谱）============
+let MENU_MEAL = '早餐';
+let MENU_DAY  = '周一';
+const MEALS = ['早餐','午餐','晚餐','夜宵'];
+const DAYS  = ['周一','周二','周三','周四','周五'];
+
+function menuPick(kind, val){
+  if(kind === 'meal') MENU_MEAL = val;
+  else MENU_DAY = val;
+  render();
+  const sc = document.getElementById('screen'); if(sc) sc.scrollTop = 0;
+}
+
+function renderMenu(){
+  const C = P.colors['餐饮服务'];
+  let h = '';
+  // 餐段切换
+  h += '<div class="wrap" style="margin-bottom:12px"><div class="slots" style="grid-template-columns:repeat(4,1fr)">';
+  MEALS.forEach(m => {
+    h += '<div class="slot' + (m === MENU_MEAL ? ' on' : '') + '" onclick="menuPick(\'meal\',\'' + m + '\')">' + m + '</div>';
+  });
+  h += '</div></div>';
+  // 日期切换（夜宵不分日）
+  if(MENU_MEAL !== '夜宵'){
+    h += '<div class="wrap" style="margin-bottom:12px"><div class="slots" style="grid-template-columns:repeat(5,1fr)">';
+    DAYS.forEach(d => {
+      h += '<div class="slot' + (d === MENU_DAY ? ' on' : '') + '" onclick="menuPick(\'day\',\'' + d + '\')">' + d + '</div>';
+    });
+    h += '</div></div>';
+  }
+  // 菜品列表
+  const dayKey = (MENU_MEAL === '夜宵') ? '每日' : MENU_DAY;
+  const list = (WEEK_MENU[MENU_MEAL] && WEEK_MENU[MENU_MEAL][dayKey]) || [];
+  h += '<div class="sect-t">' + MENU_MEAL + (MENU_MEAL === '夜宵' ? '' : ' · ' + MENU_DAY) +
+       '　<span style="font-weight:400;color:#8A8A8A;font-size:12px">共 ' + list.length + ' 道</span></div>';
+  h += '<div class="wrap"><div class="form">';
+  list.forEach((name, i) => {
+    const isMd = /（明档）/.test(name);
+    const clean = name.replace('（明档）', '');
+    h += '<div class="fitem"><div class="flabel" style="width:auto;flex:1">' +
+      '<span style="color:#B0B0B0;font-size:12px;margin-right:8px">' + (i + 1) + '</span>' +
+      esc(clean) +
+      (isMd ? '<span style="margin-left:6px;font-size:10px;padding:1px 5px;border-radius:3px;background:' +
+              C + '1A;color:' + C + '">明档</span>' : '') +
+      '</div></div>';
+  });
+  h += '</div></div>';
+  h += '<div class="sect-t" style="margin-top:14px"></div>' +
+       '<div style="text-align:center;font-size:11px;color:#A0A0A0;padding:8px 16px;line-height:1.6">' +
+       '如遇菜品调整，请以当天食堂窗口实际菜品为准</div>';
+  return h;
+}
+
 function cardHtml(p, mod){
   const ico = SVG_ICON[p.id] || SVG_ICON.canteen_menu;
   const wait = (p.status||[]).includes('待上线');
@@ -2344,14 +2692,14 @@ function render(){
 function renderHome(screen){
   renderNav({title:'办公室综合服务平台', back:false, icbc:true});
   const KK = [
-    {id:'canteen_menu',          lb:'餐单',     ic:'📋', bg:'#FFEDEC', fg:'#C7000B'},
-    {id:'canteen_weekend_order', lb:'周末订餐', ic:'📅', bg:'#FFF3E6', fg:'#C96A00'},
-    {id:'life_haircut',          lb:'理发',     ic:'💈', bg:'#E9F6EF', fg:'#0F8A5F'},
-    {id:'life_library',          lb:'阅览室',   ic:'📖', bg:'#E9F0FA', fg:'#1E5AA8'},
-    {id:'office_meeting_apply',  lb:'会议室',   ic:'🏛️', bg:'#E7F4F7', fg:'#0E7490'},
-    {id:'office_car_apply',      lb:'用车',     ic:'🚙', bg:'#F0EDFA', fg:'#6D4AA8'},
-    {id:'office_tech_repair',    lb:'维修',     ic:'🔧', bg:'#FFF7E6', fg:'#B45309'},
-    {id:'data_feedback',         lb:'建议',     ic:'💬', bg:'#FDECEC', fg:'#C7000B'}
+    {id:'canteen_menu',          lb:'餐单',     ic:SVG_ICON.canteen_menu, bg:'#FFEDEC', fg:'#C7000B'},
+    {id:'canteen_weekend_order', lb:'周末订餐', ic:SVG_ICON.canteen_weekend_order, bg:'#FFF3E6', fg:'#C96A00'},
+    {id:'life_haircut',          lb:'理发',     ic:SVG_ICON.life_haircut, bg:'#E9F6EF', fg:'#0F8A5F'},
+    {id:'life_library',          lb:'阅览室',   ic:SVG_ICON.life_library, bg:'#E9F0FA', fg:'#1E5AA8'},
+    {id:'office_meeting_apply',  lb:'会议室',   ic:SVG_ICON.office_meeting_apply, bg:'#E7F4F7', fg:'#0E7490'},
+    {id:'office_car_apply',      lb:'用车',     ic:SVG_ICON.office_car_apply, bg:'#F0EDFA', fg:'#6D4AA8'},
+    {id:'office_tech_repair',    lb:'维修',     ic:SVG_ICON.office_tech_repair, bg:'#FFF7E6', fg:'#B45309'},
+    {id:'data_feedback',         lb:'建议',     ic:SVG_ICON.data_feedback, bg:'#FDECEC', fg:'#C7000B'}
   ];
   let h = '';
   h += '<div class="icbc-hero">' +
@@ -2564,22 +2912,6 @@ function renderForm(screen, p, m){
     h += '</div></div>';
   }
 
-  if(p.id === 'canteen_menu'){
-    h += '<div class="wrap"><div class="form" style="margin-bottom:12px"><div class="fitem">' +
-      '<div class="flabel" style="width:auto;flex:1">今日 · 9月16日 周三</div>' +
-      '<div class="fval" style="color:#8A8A8A;font-size:12px">点击可切换查看日期<span class="farrow">›</span></div></div></div></div>';
-    h += '<div class="wrap" style="margin-bottom:12px"><div class="slots" style="grid-template-columns:repeat(3,1fr)">' +
-      '<div class="slot">早餐</div><div class="slot on">午餐</div><div class="slot">晚餐</div></div></div>';
-    Object.keys(MOCK.menu).forEach(cat => {
-      h += '<div class="wrap"><div class="form" style="margin-bottom:10px">' +
-        '<div class="fitem"><div class="flabel" style="color:' + P.colors['餐饮服务'] + ';font-weight:600;width:auto;flex:1">' + esc(cat) + '</div></div>';
-      MOCK.menu[cat].forEach(it => {
-        h += '<div class="fitem"><div class="flabel" style="width:auto;flex:1">' + esc(it[0]) + '</div>' +
-          '<div class="fval" style="color:' + P.colors['餐饮服务'] + ';font-weight:600">' + it[1].toFixed(1) + '</div></div>';
-      });
-      h += '</div></div>';
-    });
-  }
 
   if(p.id === 'canteen_evaluation'){
     h += '<div class="sect-t">餐品评分</div><div class="wrap"><div class="form">';
@@ -2669,7 +3001,9 @@ function renderList(screen, p, m){
 function renderDetail(screen, p, m){
   let h = '<div class="wrap">';
   h += '<div class="tip info"><span class="ti">ℹ️</span><div>' + tipFor(p) + '</div></div>';
-  if(p.id === 'canteen_dining'){
+  if(p.id === 'canteen_menu'){
+    h += renderMenu();
+  } else if(p.id === 'canteen_dining'){
     h += '<div class="list">' +
       row2('🍚','食堂用餐','扫码/刷卡进入食堂 · 3个食堂点位','已上线','green') +
       row2('📋','餐单查询','查看每日/每周餐单','已上线','green') +
