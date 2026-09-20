@@ -189,15 +189,14 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 /* ================= 配置 ================= */
-const DEPART_MIN = 9 * 60 + 30;   // 上午出发 09:30（2026-09-16 行程）
+const DEPART_MIN = 11 * 60 + 0;   // 上午出发 09:30（2026-09-16 行程）
 const PM_DEPART_MIN = 16 * 60;    // 下午出发 16:00（午间休整后重新起算）
 const BREAK_AFTER_SEG = 3;        // 第4个点(上午返回分行)之后进入午间休整
 const DEFAULT_STAY = 0;           // 默认停留(分钟)
-const STAY_OVERRIDE = {           // 各点位停留时长（分钟）
-  '黄桥支行': 30,                 // 网点调研（30分钟）
-  '东湖大郡支行': 30,             // 网点调研（30分钟）
-  '返回分行': 0,
-  '姑苏区人民政府': 40            // 走访会谈（40分钟）
+const STAY_OVERRIDE = {
+  '贵州大学西校区': 33,
+  '贵阳龙洞堡国际机场': 117,
+  '无锡硕放机场': 53,
 };
 
 let map, roadLayer, satLayer, routeLayers = [], comet = null;
