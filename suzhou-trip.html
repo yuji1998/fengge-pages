@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>苏州行程演示</title>
+<title>10月1日 贵阳 → 苏州 行程演示</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -36,6 +36,7 @@
   #legend .lg-r{display:flex;align-items:center;gap:9px;margin-top:6px;font-size:12.5px;color:#c8e4f5;}
   #legend .lg-r b{color:#4fc3f7;font-weight:600;margin-left:auto;padding-left:14px;}
   .lg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .lg-line{width:22px;height:3px;border-radius:2px;flex-shrink:0;}
 
   /* ===== 侧栏 ===== */
   #panel{width:372px;background:linear-gradient(170deg,#0c1626,#080f1c);
@@ -44,10 +45,10 @@
   #panel::-webkit-scrollbar{width:5px;}
   #panel::-webkit-scrollbar-thumb{background:#1d3a5c;border-radius:3px;}
   .p-head{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(79,195,247,.13);}
-  .p-head h1{font-size:19px;font-weight:700;letter-spacing:.5px;
+  .p-head h1{font-size:19px;font-weight:700;letter-spacing:.5px;line-height:1.4;
     background:linear-gradient(92deg,#4fc3f7,#7ee8fa 55%,#4fc3f7);-webkit-background-clip:text;
     background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
-  .p-head .sub{font-size:11.5px;color:#5a7a9a;letter-spacing:.6px;}
+  .p-head .sub{font-size:11.5px;color:#5a7a9a;letter-spacing:.6px;line-height:1.7;}
 
   /* 时间轴 */
   .timeline{position:relative;padding-left:22px;}
@@ -60,13 +61,8 @@
   .tl-item.end::before{border-color:#ff9f43;box-shadow:0 0 12px rgba(255,159,67,.8);}
   .tl-item.seg::before{left:-19px;top:19px;width:8px;height:8px;border-radius:2px;border-color:#f5a623;
     box-shadow:0 0 8px rgba(245,166,35,.6);}
-  /* 午间休整分隔卡 */
-  .tl-item.break{margin:14px 0;}
-  .tl-item.break::before{left:-20px;top:16px;width:12px;height:12px;border-radius:50%;
-    background:#0c1626;border:2.5px dashed #ffb066;box-shadow:0 0 10px rgba(255,176,102,.55);}
-  .break-card{background:linear-gradient(150deg,rgba(38,26,14,.72),rgba(14,18,28,.92));
-    border:1px dashed rgba(255,176,102,.42);}
-  .break-card .name{color:#ffc98a;}
+  .tl-item.air::before{left:-19px;top:19px;width:8px;height:8px;border-radius:50%;border-color:#9b7bff;
+    box-shadow:0 0 8px rgba(155,123,255,.7);}
   .card{background:linear-gradient(150deg,rgba(21,38,63,.92),rgba(12,22,40,.92));
         border:1px solid rgba(79,195,247,.16);border-radius:11px;padding:12px 14px;
         transition:border-color .22s,transform .22s;}
@@ -75,34 +71,38 @@
   .card .tag{display:inline-block;font-size:10px;padding:2px 9px;margin-left:7px;border-radius:9px;
     background:rgba(79,195,247,.16);color:#7dd8f8;vertical-align:1.5px;font-weight:600;letter-spacing:.4px;}
   .card .tag.end{background:rgba(255,159,67,.18);color:#ffb066;}
-/* 一键导航按钮 */
-.nav-btn{display:inline-block;margin-top:9px;margin-right:7px;padding:6px 13px;
-    font-size:12.5px;font-weight:600;border-radius:8px;text-decoration:none;
-    background:linear-gradient(140deg,rgba(79,195,247,.22),rgba(25,118,210,.28));
-    border:1px solid rgba(79,195,247,.5);color:#9fe4ff;
-    transition:transform .18s,background .18s,box-shadow .18s;cursor:pointer;}
-.nav-btn:hover{transform:translateY(-1px);background:linear-gradient(140deg,rgba(79,195,247,.42),rgba(25,118,210,.5));
-    box-shadow:0 4px 14px rgba(79,195,247,.32);color:#fff;}
-.nav-btn:active{transform:translateY(0);}
-.nav-btn.amap{border-color:rgba(79,195,247,.5);}
-.nav-btn.baidu{border-color:rgba(255,176,102,.5);color:#ffd0a3;
-    background:linear-gradient(140deg,rgba(255,159,67,.2),rgba(230,126,34,.26));}
-.nav-btn.baidu:hover{background:linear-gradient(140deg,rgba(255,159,67,.4),rgba(230,126,34,.5));
-    box-shadow:0 4px 14px rgba(255,159,67,.3);color:#fff;}
-.nav-addr{font-size:11.5px;color:#9fb6cf;margin-top:5px;line-height:1.5;
-    cursor:pointer;padding:5px 7px;border-radius:7px;
-    border:1px dashed rgba(255,176,102,.4);
-    background:rgba(255,159,67,.07);transition:background .18s,border-color .18s;}
+  /* 一键导航按钮 */
+  .nav-btn{display:inline-block;margin-top:9px;margin-right:7px;padding:6px 13px;
+      font-size:12.5px;font-weight:600;border-radius:8px;text-decoration:none;
+      background:linear-gradient(140deg,rgba(79,195,247,.22),rgba(25,118,210,.28));
+      border:1px solid rgba(79,195,247,.5);color:#9fe4ff;
+      transition:transform .18s,background .18s,box-shadow .18s;cursor:pointer;}
+  .nav-btn:hover{transform:translateY(-1px);background:linear-gradient(140deg,rgba(79,195,247,.42),rgba(25,118,210,.5));
+      box-shadow:0 4px 14px rgba(79,195,247,.32);color:#fff;}
+  .nav-btn:active{transform:translateY(0);}
+  .nav-btn.baidu{border-color:rgba(255,176,102,.5);color:#ffd0a3;
+      background:linear-gradient(140deg,rgba(255,159,67,.2),rgba(230,126,34,.26));}
+  .nav-btn.baidu:hover{background:linear-gradient(140deg,rgba(255,159,67,.4),rgba(230,126,34,.5));
+      box-shadow:0 4px 14px rgba(255,159,67,.3);color:#fff;}
+  .nav-addr{font-size:11.5px;color:#9fb6cf;margin-top:5px;line-height:1.5;
+      cursor:pointer;padding:5px 7px;border-radius:7px;
+      border:1px dashed rgba(255,176,102,.4);
+      background:rgba(255,159,67,.07);transition:background .18s,border-color .18s;}
   .nav-addr:hover,.nav-addr:active{background:rgba(255,159,67,.2);border-color:rgba(255,176,102,.85);}
   .nav-addr .addr-go{color:#ffb066;font-weight:700;white-space:nowrap;}
-  /* 百度导航按钮（复制地址 + 唤起百度地图，二合一） */
-  .nav-btn.baidu{font-weight:700;}
   .times{font-size:12px;color:#8ba8c4;margin-top:7px;line-height:1.85;}
   .times b{color:#4fc3f7;font-weight:600;font-variant-numeric:tabular-nums;}
+  .note-line{font-size:11.5px;color:#7dd8f8;margin-top:6px;
+    background:rgba(79,195,247,.09);border-left:2px solid rgba(79,195,247,.5);
+    padding:4px 8px;border-radius:0 6px 6px 0;}
   .seg-card{background:linear-gradient(150deg,rgba(28,22,14,.7),rgba(14,18,28,.92));}
+  .seg-card.air-card{background:linear-gradient(150deg,rgba(24,20,44,.75),rgba(12,16,30,.94));
+    border-color:rgba(155,123,255,.28);}
   .seg-card .name{font-size:12.5px;color:#ffc98a;font-weight:500;}
+  .seg-card.air-card .name{color:#bda8ff;}
   .seg-card .route-name{font-size:11.5px;color:#7a8ba3;margin-top:5px;line-height:1.6;}
   .stat-line{font-size:12px;color:#ffb066;margin-top:7px;font-weight:600;font-variant-numeric:tabular-nums;}
+  .seg-card.air-card .stat-line{color:#bda8ff;}
 
   /* 进度条 */
   .prog-wrap{margin:14px 0 18px;}
@@ -118,7 +118,7 @@
   #toast{position:fixed;left:50%;bottom:52px;transform:translateX(-50%) translateY(14px);
     background:rgba(12,22,40,.96);border:1px solid rgba(79,195,247,.4);color:#c8e4f5;
     padding:11px 24px;border-radius:22px;font-size:13px;opacity:0;pointer-events:none;
-    transition:all .3s;z-index:9999;box-shadow:0 8px 28px rgba(0,0,0,.6);}
+    transition:all .3s;z-index:9999;box-shadow:0 8px 28px rgba(0,0,0,.6);max-width:80vw;text-align:center;}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
   /* 途径点标记 */
@@ -167,15 +167,17 @@
       <button class="btn" onclick="copyLink()">📋 复制链接</button>
     </div>
     <div id="legend">
-      <div class="lg-t">TRIP DATA</div>
+      <div class="lg-t">TRIP DATA · 10月1日</div>
+      <div class="lg-r"><span class="lg-line" style="background:#4fc3f7;box-shadow:0 0 8px #4fc3f7"></span>驾车段</div>
+      <div class="lg-r"><span class="lg-line" style="background:#9b7bff;box-shadow:0 0 8px #9b7bff"></span>飞行段</div>
       <div class="lg-r"><span class="lg-dot" style="background:#4fc3f7;box-shadow:0 0 8px #4fc3f7"></span>总里程<b id="lgDist">—</b></div>
-      <div class="lg-r"><span class="lg-dot" style="background:#ff9f43;box-shadow:0 0 8px #ff9f43"></span>行车时长<b id="lgDur">—</b></div>
+      <div class="lg-r"><span class="lg-dot" style="background:#ff9f43;box-shadow:0 0 8px #ff9f43"></span>总耗时<b id="lgDur">—</b></div>
     </div>
   </div>
   <div id="panel">
     <div class="p-head">
-      <h1>苏州行程演示</h1>
-      <div class="sub">2026-09-16（周三）· 上午 分行→黄桥支行→东湖大郡支行 ｜ 下午 分行→姑苏区人民政府</div>
+      <h1>10月1日 贵阳 → 苏州 行程演示</h1>
+      <div class="sub" id="pSub">10月1日（国庆）· 贵大西校区 → 贵阳龙洞堡机场 → 无锡硕放机场 → 吴越领秀（家）</div>
     </div>
     <div class="prog-wrap">
       <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
@@ -187,27 +189,32 @@
 <div id="toast"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
 /* ================= 配置 ================= */
-const DEPART_MIN = 11 * 60 + 0;   // 上午出发 09:30（2026-09-16 行程）
-const PM_DEPART_MIN = 16 * 60;    // 下午出发 16:00（午间休整后重新起算）
-const BREAK_AFTER_SEG = 3;        // 第4个点(上午返回分行)之后进入午间休整
+/* 时间轴以 route_data.json 的 depart_time 为准；此处为兜底值 */
+const DEPART_MIN = 11 * 60 + 0;   // 11:00 从贵大西校区出发
 const DEFAULT_STAY = 0;           // 默认停留(分钟)
+
+/* 各点位停留时间（分钟）：抵达后停留多久再出发 */
 const STAY_OVERRIDE = {
-  '贵州大学西校区': 33,
-  '贵阳龙洞堡国际机场': 117,
-  '无锡硕放机场': 53,
+  '贵州大学西校区': 33,           // 11:00 出发 -> 11:33 到龙洞堡
+  '贵阳龙洞堡国际机场': 57,       // 11:33 到站 + 57min 办票安检 -> 12:30 起飞
+  '无锡硕放机场': 0,              // 14:30 落地 -> 立即出发（15:23 到家）
+  '吴越领秀(家)': 0
 };
 
 let map, roadLayer, satLayer, routeLayers = [], comet = null;
-/* 高德/百度官方 Key（用于带额度的导航链接）*/
+/* 高德/百度官方 Key */
 const AMAP_KEY = '73cc4832ea5a216fa41a5d28dc1ac443';
-const BAIDU_AK = 'ixivqIOKzXeTQhUPN9el3wm141XglLqn';
+const BAIDU_AK = 'ixivqIOKXeTQhUPN9el3wm141XglLqn'.replace('KXeT','KzXeT');
 let ROUTE = null, rafId = null, t0 = 0, paused = false, progress = 0;
 let FULL = [], CUM = [], TRIP_DIST = 0;
 
+function isFlight(seg){ return !!(seg && (seg.mode === 'flight' || seg.mode === 'air')); }
+
 /* ================= 地图 ================= */
-map = L.map('map',{zoomControl:false,attributionControl:true}).setView([31.322,120.7255],13);
+map = L.map('map',{zoomControl:false,attributionControl:true}).setView([28.0,113.5],6);
 L.control.zoom({position:'bottomright'}).addTo(map);
 
 const TILE_ROAD='https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}';
@@ -232,13 +239,7 @@ function setBase(mode){
 }
 
 /* ================= 工具 ================= */
-/* 一键导航：高德 / 百度 双端唤起（手机点开直达导航，PC打开网页版）
-   关键点：
-   ① 目的地名用 full_name（完整机构名），否则地图上只显示“黄桥支行”这种模糊名
-   ② 百度必须用 BD-09 坐标；高德/route_data 里的 lnglat 是 GCJ-02，直喂百度会偏 ~600m */
 function navDest(pt){
-  /* 优先全名；若全名把支行名包在括号里（如“中国工商银行(苏州黄桥支行)”），
-     则去掉括号但保留括号内内容 → “中国工商银行苏州黄桥支行” */
   let s = (pt.full_name||pt.name||'');
   s = s.replace(/[（(]([^）)]*)[）)]/g, '$1').trim();
   return s || pt.name || '';
@@ -249,40 +250,30 @@ function navUrl(kind, pt){
   const nm=navDest(pt);
   const addr=pt.addr||'';
   if(kind==='amap'){
-    /* 高德 URI：to=lng,lat,名称（坐标用 GCJ-02）—— 实测浏览器可直接唤起 */
     return 'https://uri.amap.com/navigation?to='+gcjLng+','+gcjLat+','+encodeURIComponent(nm)+
            '&mode=car&policy=1&src=fengge&coordinate=gaode&callnative=1';
   }
   if(kind==='baidu'){
-    /* 百度官方 scheme：坐标必须 BD-09，origin 留空=当前位置 */
     return 'baidumap://map/direction?origin=&destination=latlng:'+bd[1]+','+bd[0]+
            '|name:'+encodeURIComponent(addr?nm+'('+addr+')':nm)+
            '&mode=driving&coord_type=bd09ll&src=webapp.fengge.default';
   }
   if(kind==='baiduweb'){
-    /* 百度 H5 兜底页 */
     return 'https://api.map.baidu.com/direction?destination=latlng:'+bd[1]+','+bd[0]+
            '|name:'+encodeURIComponent(addr?nm+'('+addr+')':nm)+
            '&mode=driving&region='+encodeURIComponent('苏州')+'&output=html&src=fengge&ak='+BAIDU_AK;
   }
   return '#';
 }
-/* 唤起地图 App：先 iframe（安卓主流做法），1.5s 后兜底跳 H5/商店 */
 function openNav(kind, pt){
   const url=navUrl(kind, pt);
-  if(kind==='amap'){
-    /* 高德 https URI 直接整窗跳转最稳 */
-    window.location.href=url;
-    return;
-  }
-  /* 百度：用 iframe 唤起，失败则跳 H5 */
+  if(kind==='amap'){ window.location.href=url; return; }
   const ifr=document.createElement('iframe');
   ifr.style.cssText='display:none;width:0;height:0;border:0';
   ifr.src=url;
   document.body.appendChild(ifr);
   setTimeout(()=>{
     try{document.body.removeChild(ifr);}catch(e){}
-    /* 页面仍在 → 多半没唤起，跳百度 H5 网页版兜底 */
     if(!document.hidden)window.location.href=navUrl('baiduweb', pt);
   }, 1600);
 }
@@ -290,7 +281,7 @@ function fmtTime(min){const h=Math.floor(min/60)%24,m=Math.round(min%60);return 
 function fmtDur(sec){const m=Math.round(sec/60);return m>=60?(Math.floor(m/60)+'小时'+(m%60?(m%60)+'分':'')):m+'分钟';}
 function fmtDist(m){return (m/1000).toFixed(1)+' 公里';}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
-  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2200);}
+  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2400);}
 function copyLink(){
   const url=location.href;
   const done=()=>toast('✅ 链接已复制，可直接分享');
@@ -298,8 +289,10 @@ function copyLink(){
     ta.select();try{document.execCommand('copy');done();}catch(e){toast('复制失败，请手动复制');}ta.remove();};
   if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(url).then(done,fb);else fb();
 }
+/* route_data 里 polyline 统一是 [lng,lat]，Leaflet 需要 [lat,lng] */
+function pl2ll(poly){ return (poly||[]).map(p=>[p[1],p[0]]); }
 
-/* ================= 勾选：流光层（canvas 拖尾彗星） ================= */
+/* ================= 流光层（canvas 拖尾彗星） ================= */
 const FlowLayer = L.Layer.extend({
   initialize(){ this._canvas=null; this._trail=[]; this._rings=[]; this._pos=0; this._head=[0,0]; },
   onAdd(map){
@@ -329,7 +322,7 @@ const FlowLayer = L.Layer.extend({
     this._trail.push(this._head.slice());
     if(this._trail.length>52)this._trail.shift();
   },
-  burst(){ this._rings.push({r:0,a:1}); if(this._rings.length>6)this._rings.shift(); },
+  burst(wi){ this._rings.push({r:0,a:1,wi:wi}); if(this._rings.length>6)this._rings.shift(); },
   draw(){
     const c=this._canvas; if(!c)return;
     const ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height);
@@ -341,8 +334,8 @@ const FlowLayer = L.Layer.extend({
       const [x,y]=P(T[i]);
       const k=i/(T.length-1||1), size=2.2+k*4.6, al=0.09+k*k*0.62;
       const g=ctx.createRadialGradient(x,y,0,x,y,size*2.6);
-      g.addColorStop(0,`rgba(126,232,250,${al})`);
-      g.addColorStop(0.45,`rgba(79,195,247,${al*0.65})`);
+      g.addColorStop(0,'rgba(126,232,250,'+al+')');
+      g.addColorStop(0.45,'rgba(79,195,247,'+(al*0.65)+')');
       g.addColorStop(1,'rgba(25,118,210,0)');
       ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,size*2.6,0,6.2832); ctx.fill();
     }
@@ -364,7 +357,7 @@ const FlowLayer = L.Layer.extend({
       const pt=this._waypoints&&this._waypoints[rg.wi];
       if(!pt){this._rings.splice(i,1);continue;}
       const [x,y]=P(pt);
-      ctx.strokeStyle=`rgba(126,232,250,${rg.a})`; ctx.lineWidth=2.2;
+      ctx.strokeStyle='rgba(126,232,250,'+rg.a+')'; ctx.lineWidth=2.2;
       ctx.beginPath(); ctx.arc(x,y,rg.r,0,6.2832); ctx.stroke();
       rg.r+=1.5; rg.a-=0.022;
       if(rg.a<=0)this._rings.splice(i,1);
@@ -378,55 +371,81 @@ fetch('route_data.json').then(r=>r.json()).then(d=>{ROUTE=d;render();})
    '<div class="error">路线数据加载失败：'+e.message+'<br>请确认 route_data.json 与页面同目录。</div>';});
 
 function render(){
-  const {points,segments,total_distance,total_duration}=ROUTE;
-  window.POINTS_REF=points;   /* 供一键导航按钮取点位 */
+  const points=ROUTE.points||[], segments=ROUTE.segments||[];
+  const total_distance=ROUTE.total_distance||0, total_duration=ROUTE.total_duration||0;
+  window.POINTS_REF=points;
 
-  /* 时间推算（支持午间休整：休整点之后从下午出发时间重新起算） */
-  let clock=DEPART_MIN;
+  /* ---- 标题 / 副标题 ---- */
+  if(ROUTE.title){
+    document.querySelector('.p-head h1').textContent=ROUTE.title;
+    document.title=ROUTE.title;
+  }
+  if(ROUTE.date){
+    const names=points.map(p=>p.name).join(' → ');
+    document.getElementById('pSub').textContent=
+      ROUTE.date+(ROUTE.flight_no_note?' · 航班 '+ROUTE.flight_no_note:'')+' · '+names;
+  }
+
+  /* ---- 时间推算 ---- */
+  let departMin=DEPART_MIN;
+  if(typeof ROUTE.depart_time==='string' && /^\d{1,2}:\d{2}$/.test(ROUTE.depart_time)){
+    const a=ROUTE.depart_time.split(':');
+    departMin=parseInt(a[0],10)*60+parseInt(a[1],10);
+  }
+  let clock=departMin;
   points.forEach((pt,i)=>{
-    const stay=STAY_OVERRIDE[pt.name]!=null?STAY_OVERRIDE[pt.name]:DEFAULT_STAY;
-    if(i===0){pt._arrive=null;pt._leave=clock;pt._stay=null;}
+    if(i===0){ pt._arrive=null; pt._leave=clock; pt._stay=null; }
     else{
-      if(i===BREAK_AFTER_SEG+1){clock=PM_DEPART_MIN;pt._afterBreak=true;}
       const sg=segments[i-1];
       pt._arrive=clock+Math.round((sg?sg.duration:0)/60);
-      pt._leave=pt._arrive+stay;pt._stay=stay;clock=pt._leave;
+      const stay=(STAY_OVERRIDE[pt.name]!=null)?STAY_OVERRIDE[pt.name]:DEFAULT_STAY;
+      pt._leave=pt._arrive+stay; pt._stay=stay; clock=pt._leave;
     }
   });
 
-  /* 合并全轨迹 */
-  FULL=[]; segments.forEach(s=>s.polyline.forEach(p=>FULL.push([p[1],p[0]])));
-  CUM=[]; let acc=0; CUM.push(0);
+  /* ---- 合并全轨迹 ---- */
+  FULL=[]; CUM=[];
+  segments.forEach(s=>{ (s.polyline||[]).forEach(p=>FULL.push([p[1],p[0]])); });
+  let acc=0; CUM.push(0);
   segments.forEach(s=>{
-    const n=s.polyline.length;
+    const poly=s.polyline||[], n=poly.length;
     for(let j=1;j<n;j++){
-      const a=s.polyline[j-1],b=s.polyline[j];
+      const a=poly[j-1],b=poly[j];
       acc+=Math.hypot((b[0]-a[0])*102000,(b[1]-a[1])*87000);
       CUM.push(acc);
     }
   });
   TRIP_DIST=acc||total_distance;
 
-  /* 路线：三层描边发光 */
+  /* ---- 路线：驾车=实线发光；飞行=紫色虚线 ---- */
   routeLayers.forEach(l=>map.removeLayer(l)); routeLayers=[];
   segments.forEach(seg=>{
-    const ll=seg.polyline.map(p=>[p[1],p[0]]);
-    routeLayers.push(
-      L.polyline(ll,{color:'#1976d2',weight:16,opacity:.16,lineJoin:'round',lineCap:'round'}).addTo(map),
-      L.polyline(ll,{color:'#4fc3f7',weight:7,opacity:.34,lineJoin:'round',lineCap:'round'}).addTo(map),
-      L.polyline(ll,{color:'#b3ecff',weight:2.4,opacity:.95,lineJoin:'round',lineCap:'round'}).addTo(map)
-    );
+    const ll=pl2ll(seg.polyline);
+    if(!ll.length)return;
+    if(isFlight(seg)){
+      routeLayers.push(
+        L.polyline(ll,{color:'#9b7bff',weight:11,opacity:.18,lineJoin:'round',lineCap:'round'}).addTo(map),
+        L.polyline(ll,{color:'#bda8ff',weight:3.2,opacity:.9,lineJoin:'round',lineCap:'round',
+                       dashArray:'12 10'}).addTo(map)
+      );
+    }else{
+      routeLayers.push(
+        L.polyline(ll,{color:'#1976d2',weight:16,opacity:.16,lineJoin:'round',lineCap:'round'}).addTo(map),
+        L.polyline(ll,{color:'#4fc3f7',weight:7,opacity:.34,lineJoin:'round',lineCap:'round'}).addTo(map),
+        L.polyline(ll,{color:'#b3ecff',weight:2.4,opacity:.95,lineJoin:'round',lineCap:'round'}).addTo(map)
+      );
+    }
   });
 
-  /* 图钉标记 */
+  /* ---- 图钉标记 ---- */
   points.forEach((pt,i)=>{
     const isEnd=i===points.length-1;
     const html='<div class="pin'+(isEnd?' end':'')+'"><span class="halo"></span>'+(i+1)+'</div>';
-    const icon=L.divIcon({className:'',html,iconSize:[30,30],iconAnchor:[15,15]});
-    routeLayers.push(L.marker([pt.lnglat[1],pt.lnglat[0]],{icon,zIndexOffset:500})
+    const icon=L.divIcon({className:'',html:html,iconSize:[30,30],iconAnchor:[15,15]});
+    routeLayers.push(L.marker([pt.lnglat[1],pt.lnglat[0]],{icon:icon,zIndexOffset:500})
       .addTo(map).bindPopup('<b>'+(i+1)+'. '+pt.name+'</b>'+
-        (pt.full_name?'<br><span style="color:#333;font-size:12.5px">'+pt.full_name+'</span>':'')+
         (pt.addr?'<br><span style="color:#888;font-size:12px">'+pt.addr+'</span>':'')+
+        (pt.note?'<br><span style="color:#1976d2;font-size:12px">'+pt.note+'</span>':'')+
         '<div style="margin-top:8px">'+
         '<a href="javascript:void(0)" onclick="openNav(\'amap\',POINTS_REF['+i+'])" '+
           'style="display:inline-block;margin-right:6px;padding:4px 10px;border-radius:6px;'+
@@ -440,29 +459,32 @@ function render(){
   const all=FULL.slice();
   if(all.length)map.fitBounds(L.latLngBounds(all),{padding:[70,70]});
 
-  /* 流光层 */
+  /* ---- 流光层 ---- */
   if(comet)map.removeLayer(comet);
-  comet=new FlowLayer(); comet._waypoints=points.map(p=>[p.lnglat[1],p.lnglat[0]]);
+  comet=new FlowLayer();
+  comet._waypoints=points.map(p=>[p.lnglat[1],p.lnglat[0]]);
   comet.addTo(map);
 
-  /* 图例 */
+  /* ---- 图例 ---- */
   document.getElementById('lgDist').textContent=fmtDist(total_distance);
   document.getElementById('lgDur').textContent=fmtDur(total_duration);
 
-  /* 时间轴 */
+  /* ---- 时间轴 ---- */
   const tl=document.getElementById('timeline'); tl.innerHTML='';
   points.forEach((pt,i)=>{
     const isEnd=i===points.length-1;
     let times='';
-    if(i===0)times='🕘 出发　<b>'+fmtTime(pt._leave)+'</b>';
-    else{
-      times='🕓 到达　<b>'+fmtTime(pt._arrive)+'</b>　·　🕕 离开　<b>'+fmtTime(pt._leave)+'</b>';
+    if(i===0){
+      times='🕚 出发　<b>'+fmtTime(pt._leave)+'</b>';
+    }else{
+      times='🕓 到达　<b>'+fmtTime(pt._arrive)+'</b>';
+      if(pt._stay)times+='　·　🕕 离开　<b>'+fmtTime(pt._leave)+'</b>';
       if(pt._stay)times+='<br>⏸ 停留 '+pt._stay+' 分钟';
     }
     const d=document.createElement('div');
     d.className='tl-item'+(isEnd?' end':'');
     d.style.animationDelay=(i*0.08)+'s';
-    /* 一键导航按钮（目的地用官方全名 + 完整地址） */
+
     let navBtns='<div class="nav-actions">'+
       '<a class="nav-btn amap" href="javascript:void(0)" onclick="openNav(\'amap\',POINTS_REF['+i+'])" '+
         'title="用高德地图导航到该点">🧭 高德导航</a>'+
@@ -472,36 +494,45 @@ function render(){
     if(pt.addr)navBtns+='<div class="nav-addr" onclick="baiduNav('+i+')" '+
       'title="点击：复制地址并用百度地图导航">📍 '+navDest(pt)+' · '+pt.addr+
       ' <span class="addr-go">导航 ›</span></div>';
+
     d.innerHTML='<div class="card"><span class="name">'+(i+1)+'. '+pt.name+'</span>'+
       '<span class="tag'+(isEnd?' end':'')+'">'+(i===0?'起点':(isEnd?'终点':'途经'))+'</span>'+
-      '<div class="times">'+times+'</div>'+navBtns+'</div>';
+      '<div class="times">'+times+'</div>'+
+      (pt.note?'<div class="note-line">'+pt.note+'</div>':'')+
+      navBtns+'</div>';
     tl.appendChild(d);
 
-    /* 午间休整分隔卡 */
-    if(i===BREAK_AFTER_SEG){
-      const b=document.createElement('div');
-      b.className='tl-item break';
-      b.style.animationDelay=((i+0.4)*0.08)+'s';
-      b.innerHTML='<div class="card break-card"><span class="name">🏢 返回分行 · 午间休整</span>'+'<div class="times">上午调研结束，回分行休整；下午 <b>'+fmtTime(PM_DEPART_MIN)+'</b> 再次出发</div></div>';
-      tl.appendChild(b);
-    }
-
+    /* 段卡片 */
     if(i<segments.length){
       const sg=segments[i];
-      const roads=sg.steps.filter(s=>s.road).map(s=>s.road).filter((v,j,a)=>a.indexOf(v)===j).slice(0,3).join(' → ');
+      const flight=isFlight(sg);
+      let roads='';
+      if(Array.isArray(sg.roads)&&sg.roads.length){
+        roads=sg.roads.slice(0,3).join(' → ');
+      }else if(Array.isArray(sg.steps)){
+        roads=sg.steps.filter(s=>s&&s.road).map(s=>s.road)
+          .filter((v,j,a)=>a.indexOf(v)===j).slice(0,3).join(' → ');
+      }
       const e=document.createElement('div');
-      e.className='tl-item seg'; e.style.animationDelay=((i+0.5)*0.08)+'s';
-      e.innerHTML='<div class="card seg-card"><span class="name">🚗 行驶段 '+(i+1)+'</span>'+
+      e.className='tl-item '+(flight?'air':'seg');
+      e.style.animationDelay=((i+0.5)*0.08)+'s';
+      e.innerHTML='<div class="card seg-card'+(flight?' air-card':'')+'">'+
+        '<span class="name">'+(flight?'✈️ 飞行段 ':'🚗 行驶段 ')+(i+1)+'</span>'+
         (roads?'<div class="route-name">'+roads+'</div>':'')+
-        '<div class="stat-line">⏱ 行车 '+fmtDur(sg.duration)+'　·　📏 '+fmtDist(sg.distance)+'</div></div>';
+        '<div class="stat-line">'+(flight?'⏱ 飞行 ':'⏱ 行车 ')+fmtDur(sg.duration)+
+          '　·　📏 '+fmtDist(sg.distance)+'</div>'+
+        (sg.note?'<div class="note-line">'+sg.note+'</div>':'')+
+        '</div>';
       tl.appendChild(e);
     }
   });
+
+  /* ---- 全程合计 ---- */
   const s=document.createElement('div');
   s.className='tl-item'; s.style.animationDelay=((points.length*2-1)*0.08)+'s';
   s.innerHTML='<div class="card"><span class="name">🧾 全程合计</span>'+
     '<div class="stat-line">⏱ '+fmtDur(total_duration)+'　·　📏 '+fmtDist(total_distance)+'</div>'+
-    '<div class="times">含停留约 '+fmtTime(clock)+' 结束</div></div>';
+    '<div class="times">'+fmtTime(departMin)+' 出发 · 预计 <b>'+fmtTime(clock)+'</b> 到家</div></div>';
   tl.appendChild(s);
 
   startAnimation();
@@ -509,6 +540,7 @@ function render(){
 
 /* ================= 动画循环 ================= */
 const SPEED=0.000135;   // 进度/毫秒
+let lastWi=-1;
 function startAnimation(){
   if(rafId)cancelAnimationFrame(rafId);
   t0=performance.now()-progress/SPEED;
@@ -519,16 +551,14 @@ function keep(){
   const now=performance.now();
   if(!paused){
     progress=(now-t0)*SPEED;
-    if(progress>=1){progress=0;t0=now;comet._trail.length=0;}
+    if(progress>=1){progress=0;t0=now;if(comet)comet._trail.length=0;lastWi=-1;t0=now;}
   }
   if(!FULL.length)return;
-  comet.setProgress(progress,FULL);
-  comet.draw();
+  if(comet){ comet.setProgress(progress,FULL); comet.draw(); }
   updateHUD();
 }
 
-/* 到站脉冲：按累计里程判断 */
-let lastWi=-1;
+/* 到站脉冲 + 进度 */
 function updateHUD(){
   const el=document.getElementById('progFill'), pos=document.getElementById('progPos'), pct=document.getElementById('progPct');
   if(!el||!CUM.length)return;
@@ -537,22 +567,32 @@ function updateHUD(){
   pct.textContent=(progress*100).toFixed(0)+'%';
   let wi=0;
   for(let i=0;i<CUM.length;i++){ if(CUM[i]<=d)wi=i; else break; }
-  // 找最近的点名
-  let acc=0,label='起点';
-  const nSeg=(ROUTE&&ROUTE.segments)?ROUTE.segments.length:0;
-  let idx=0;
-  if(nSeg){
-    let cum=0;
-    for(let i=0;i<nSeg;i++){
-      if(d<=cum+ROUTE.segments[i].distance){idx=i;break;}
-      cum+=ROUTE.segments[i].distance;idx=i+1;
+
+  const pts=(ROUTE&&ROUTE.points)||[];
+  const segs=(ROUTE&&ROUTE.segments)||[];
+  let label='起点';
+  if(pts.length>1){
+    let cum=0, idx=0;
+    for(let i=0;i<segs.length;i++){
+      if(d<=cum+(segs[i].distance||0)){ idx=i; break; }
+      cum+=segs[i].distance||0; idx=i+1;
     }
+    if(idx<=0)label='前往 '+pts[1].name;
+    else if(idx>=segs.length)label='抵达 '+pts[pts.length-1].name;
+    else label='在 '+pts[idx].name.replace(/\s.*$/,'');
   }
-  const pts=ROUTE.points;
-  if(idx<=0)label='前往 '+pts[1].name;
-  else if(idx>=nSeg)label='抵达 '+pts[pts.length-1].name;
-  else label='在 '+pts[idx].name.replace(/\s.*$/,'');
   pos.textContent=label;
+
+  /* 过站脉冲（简单阈值触发） */
+  if(comet&&pts.length){
+    let cum=0, newWi=-1;
+    for(let i=0;i<segs.length;i++){
+      cum+=segs[i].distance||0;
+      if(d>=cum-1){ newWi=i+1; } else break;
+    }
+    if(newWi>lastWi&&newWi>0&&newWi<pts.length){ comet.burst(newWi); lastWi=newWi; }
+    if(d<1)lastWi=-1;
+  }
 }
 
 function toggleReplay(){
@@ -570,7 +610,6 @@ function baiduNav(i){
   var pt=(window.POINTS_REF||[])[i];
   if(!pt){toast('地址读取失败');return;}
   var txt=navDest(pt)+(pt.addr?' '+pt.addr:'');
-  /* 1) 先把地址写进剪贴板（这样用户切到百度地图后，搜索框粘贴即可） */
   try{
     if(navigator.clipboard&&window.isSecureContext){
       navigator.clipboard.writeText(txt).catch(function(){});
@@ -584,8 +623,6 @@ function baiduNav(i){
   }catch(e){}
   toast('📋 已复制：'+txt);
 
-  /* 2) 唤起百度地图：优先 scheme（带坐标，直接出路线）；
-        1.6s 没跳走 → 退到 H5 页；再不行用户可自己在百度地图里粘贴地址 */
   var bd=pt.bd09||pt.lnglat;
   var scheme='baidumap://map/direction?origin=&destination=latlng:'+bd[1]+','+bd[0]+
              '|name:'+encodeURIComponent(txt)+
