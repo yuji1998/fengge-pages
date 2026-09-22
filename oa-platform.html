@@ -157,6 +157,36 @@ body{
   padding:1px 5px;border-radius:7px;border:1.5px solid #fff;line-height:1.4;
 }
 
+/* ============ 通知栏跑马灯（首页金刚区下方） ============ */
+.notice-bar{
+  display:flex;align-items:center;gap:8px;
+  margin:12px 14px 0;padding:0 12px;height:36px;
+  background:#FFF5F5;border:1px solid #FFE3E3;border-radius:10px;
+  overflow:hidden;position:relative;
+}
+.notice-bar .nb-ic{
+  flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+  width:18px;height:18px;color:var(--icbc);
+}
+.notice-bar .nb-ic svg{width:16px;height:16px;display:block;}
+.notice-bar .nb-track{
+  flex:1;min-width:0;overflow:hidden;position:relative;height:100%;
+}
+.notice-bar .nb-txt{
+  position:absolute;top:0;left:0;height:100%;
+  display:flex;align-items:center;white-space:nowrap;
+  font-size:12px;color:#C7000B;letter-spacing:.2px;
+  will-change:transform;
+  animation:nb-marquee 14s linear infinite;
+}
+@keyframes nb-marquee{
+  0%   { transform:translateX(100%); }
+  100% { transform:translateX(-100%); }
+}
+@keyframes nb-marquee-2{
+  0%   { transform:translateX(0); }
+  100% { transform:translateX(-200%); }
+}
 /* ============ 模块卡（首页下方） ============ */
 .sect-hd{
   display:flex;align-items:center;justify-content:space-between;
@@ -439,6 +469,18 @@ window.OA_DATA = {
             {
               "label": "被访部门",
               "type": "select",
+              "options": [
+                "办公室",
+                "人力资源部",
+                "财务会计部",
+                "金融科技部",
+                "公司金融业务部",
+                "个人金融业务部",
+                "风险管理部",
+                "安全保卫部",
+                "运行管理部",
+                "其他"
+              ],
               "required": true
             },
             {
@@ -1470,6 +1512,17 @@ window.OA_DATA = {
               "required": true
             },
             {
+              "label": "车型选择",
+              "type": "select",
+              "options": [
+                "轿车",
+                "商务车",
+                "大商务车（10人）",
+                "考斯特（17人以内）"
+              ],
+              "required": true
+            },
+            {
               "label": "乘车人数",
               "type": "number",
               "required": true
@@ -1758,6 +1811,21 @@ window.OA_DATA = {
               "required": true
             },
             {
+              "label": "维修事项",
+              "type": "select",
+              "options": [
+                "灯管/照明更换",
+                "空调故障",
+                "水龙头/水管漏水",
+                "门锁/门禁故障",
+                "办公桌椅维修",
+                "墙面/地面修补",
+                "卫生间设施维修",
+                "其他"
+              ],
+              "required": true
+            },
+            {
               "label": "故障描述",
               "type": "textarea",
               "required": true
@@ -1775,6 +1843,13 @@ window.OA_DATA = {
                 "紧急"
               ],
               "required": true
+            },
+            {
+              "label": "申请人",
+              "type": "user_info",
+              "name": "张三",
+              "dept": "金融科技部",
+              "mode": "current_account"
             }
           ],
           "status": [
@@ -3818,6 +3893,13 @@ function renderHome(screen){
     '</div>' +
 
   '</div>';
+
+  // 通知栏跑马灯（金刚区上方）
+  h += '<div class="notice-bar">' +
+       '<div class="nb-ic">' + SVG_ICON.row_recent + '</div>' +
+       '<div class="nb-track"><div class="nb-txt">' +
+       '分行员工综合服务平台demo测试系统测试' +
+       '</div></div></div>';
 
   // 金刚区
   h += '<div class="kingkong"><div class="kk-grid">';
