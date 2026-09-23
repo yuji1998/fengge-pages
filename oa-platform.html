@@ -135,6 +135,17 @@ body{
   border:1px solid rgba(255,255,255,.14);
 }
 
+/* ============ 轮播广告落地页 ============ */
+.ad-wrap{padding:0 0 24px;background:#F5F6F8;min-height:100%;}
+.ad-hero{width:100%;display:block;background:#EDEDED;}
+.ad-body{background:#fff;margin:0 14px;margin-top:-14px;border-radius:12px;
+  padding:18px 16px 20px;box-shadow:0 2px 12px rgba(0,0,0,.06);position:relative;}
+.ad-body h2{margin:0 0 10px;font-size:17px;color:#1A1A1A;font-weight:600;}
+.ad-body p{margin:0 0 16px;font-size:13px;color:#666;line-height:1.75;white-space:pre-wrap;}
+.ad-btn{width:100%;padding:12px;border:none;border-radius:9px;background:#C7000B;color:#fff;
+  font-size:15px;font-family:inherit;cursor:pointer;}
+.ad-btn:active{opacity:.85;}
+
 /* ============ 金刚区（工行式功能入口） ============ */
 .kingkong{
   background:#fff;border-radius:12px;margin:-44px 14px 12px;padding:16px 8px 8px;
@@ -2539,7 +2550,7 @@ const T = window.OA_TOKENS;
 //   即 V1.0 → V1.1 → V1.2 …（修改一次递增一次）
 //   发布时：运行 scripts/oa_bump_publish.py 自动 +0.1 并推送
 // ============================================================
-const APP_VERSION = '1.4';
+const APP_VERSION = '1.5';
 
 // 色值 -> 淡色底（用于最近使用图标底色）
 function hexToTint(hex, a){
@@ -3225,8 +3236,7 @@ let ROUTE = '#/';
 let hist = [];
 
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
-function allPages(){ return P.modules.flatMap(m => m.pages.map(p => Object.assign({}, p, {_mod:m}))); }
-function pageById(id){
+function allPages(){ return P.modules.flatMap(m => m.pages.map(p => Object.assign({}, p, {_mod:m}))); }function pageById(id){
   const all = allPages();
   let p = all.find(x => x.id === id);
   if(p) return p;
@@ -4100,6 +4110,7 @@ function render(){
   if(key === 'msg_center'){ renderMsgCenter(screen); return; }                    // P3-④：消息中心
   if(key === 'mgmt_auth_config'){ renderMgmtAuthConfig(screen); return; }         // P3-⑥：用户授权配置
   if(key === 'service'){ renderTab('service'); renderService(screen); return; }
+  if(key === 'ad_1' || key === 'ad_2'){ renderAdPage(screen, key); return; }   // 轮播广告落地页
   if(!key){ renderTab('home'); renderHome(screen); return; }
   var p = pageById(key);
   if(!p && parts[1]){ p = pageById(key + '_' + parts[1]); }
@@ -4202,8 +4213,7 @@ function closeKKEditor(){ closeSpec(); }
 
 function renderKKEditor(){
   var box = document.getElementById('specbox');
-  var all = allPages();
-  var h = '<div class="kk-ed-hd"><div class="t">编辑金刚区</div>' +
+  var all = allPages();  var h = '<div class="kk-ed-hd"><div class="t">编辑金刚区</div>' +
           '<div class="x" onclick="closeKKEditor()">✕</div></div>';
 
   // 已添加
@@ -4284,7 +4294,8 @@ function renderHome(screen){
   h += '<div class="icbc-hero">' +
     '<div class="row1">' +
       '<div class="logo"><div class="mark">工</div>' +
-        '<div><div class="nm">中国工商银行</div><div class="sub">苏州分行 · 办公室综合服务</div></div></div>' +
+        '<div><div class="nm">' + esc(MOCK.user.dept || '金融科技部') + '</div>' +
+        '<div class="sub">' + esc(MOCK.user.name || '张三') + ' · 办公室综合服务</div></div></div>' +
       '<div class="user"><span>' + MOCK.user.name + '</span>' +
         '<div class="av">' + MOCK.user.avatar + '</div></div>' +
     '</div>' +
@@ -4324,23 +4335,6 @@ function renderHome(screen){
     h += '</div></div>';
   }
 
-  // 模块列表
-  h += '<div class="sect-hd"><div class="t"><i></i>服务模块</div>' +
-       '<div class="m">' + P.modules.length + ' 个模块 / ' + P.modules.reduce(function(a,m){return a + m.functions.length;},0) + ' 项功能</div></div>';
-  h += '<div class="modlist">';
-  P.modules.forEach(m => {
-    const st = (m.priority||'');
-    const cls = /一期/.test(st) && !/二期|三期/.test(st) ? 'green'
-              : /二期/.test(st) && !/三期/.test(st) ? 'blue' : 'orange';
-    h += '<div class="modrow" onclick="go(\'#/' + m.pages[0].id + '\')">' +
-      '<div class="mi" style="background:' + m.color + '18;color:' + m.color + '">' + (SVG_MI[m.key]||'📄') + '</div>' +
-      '<div class="mb"><div class="mt">' + esc(m.name) +
-        '<span class="tag inline ' + cls + '">' + esc(st) + '</span></div>' +
-        '<div class="md">' + m.functions.length + ' 项功能 · 由' + esc(m.owner) + '负责</div></div>' +
-      '<span class="ar">›</span></div>';
-  });
-  h += '</div>';
-
   h += '<div class="demo-note"><b>原型说明</b>：可点击交互原型，供开发参考。数据均为演示数据。' +
        '右下角 <b>ⓘ</b> 可查看当前页面规格（路由 / 字段 / 依赖 / 对接系统）。</div>';
   h += '<div class="copyright">中国工商银行苏州分行 · 办公室综合服务平台 手机端原型 V' + APP_VERSION + '</div>';
@@ -4355,7 +4349,54 @@ function renderHome(screen){
 //   两张图 banner_1.jpg / banner_2.jpg，3.5s 自动切换，底部圆点指示器
 //   ⚠ renderHome 会被反复调用，定时器必须先去后建，否则会越转越快
 // ============================================================
-var OA_BANNERS = ['banner_1.jpg', 'banner_2.jpg'];
+var OA_BANNERS = [
+  {img:'banner_1.jpg', link:'#/ad_1'},
+  {img:'banner_2.jpg', link:'#/ad_2'}
+];
+
+// 轮播广告落地页配置（改文案/链接/图都改这里）
+var OA_ADS = {
+  ad_1: {
+    title: '广告详情',
+    img: 'ad_1.jpg',
+    head: '活动详情',
+    body: '这里填写第一个广告的详细内容。',
+    action: '立即参与',
+    target: ''            // 留空=不跳转；可填外部网址或内部路由 '#/xxx'
+  },
+  ad_2: {
+    title: '广告详情',
+    img: 'ad_2.jpg',
+    head: '活动详情',
+    body: '这里填写第二个广告的详细内容。',
+    action: '立即参与',
+    target: ''
+  }
+};
+
+function renderAdPage(screen, key){
+  var a = OA_ADS[key];
+  if(!a){ screen.innerHTML = '<div class="empty"><div class="ei">🧭</div>广告不存在</div>'; return; }
+  renderTab(null);
+  renderNav({title: a.title, back:true, icbc:true});
+  var h = '<div class="ad-wrap">';
+  h += '<img class="ad-hero" src="' + a.img + '" alt="' + esc(a.head) + '" onerror="this.style.display=\'none\'">';
+  h += '<div class="ad-body">';
+  h += '<h2>' + esc(a.head) + '</h2>';
+  h += '<p>' + esc(a.body) + '</p>';
+  if(a.action){
+    var tap = a.target ? ' onclick="adAction(\'' + key + '\')"' : '';
+    h += '<button class="ad-btn"' + tap + '>' + esc(a.action) + '</button>';
+  }
+  h += '</div></div>';
+  screen.innerHTML = h;
+}
+function adAction(key){
+  var a = OA_ADS[key];
+  if(!a || !a.target) return;
+  if(a.target.charAt(0) === '#'){ location.hash = a.target; }
+  else { window.open(a.target, '_blank'); }
+}
 var _bannerTimer = null;
 var _bannerIdx = 0;
 var BANNER_INTERVAL = 3500;
@@ -4363,8 +4404,11 @@ var BANNER_INTERVAL = 3500;
 function renderBanner(){
   var h = '<div class="banner-wrap" id="oaBanner">';
   h += '<div class="banner-track" id="oaBannerTrack">';
-  OA_BANNERS.forEach(function(src){
-    h += '<img class="banner-img" src="' + src + '" alt="宣传图">';
+  OA_BANNERS.forEach(function(b){
+    var src = typeof b === 'string' ? b : b.img;
+    var link = (typeof b === 'object' && b.link) ? b.link : '';
+    var tap = link ? ' onclick="location.hash=\'' + link + '\'"' : '';
+    h += '<img class="banner-img" src="' + src + '" alt="宣传图"' + tap + '>';
   });
   h += '</div>';
   h += '<div class="banner-dots" id="oaBannerDots">';
