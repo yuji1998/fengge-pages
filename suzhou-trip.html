@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>10月1日 贵阳 → 苏州 行程演示</title>
+<title>10月23日 常熟走访调研行程</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -167,17 +167,17 @@
       <button class="btn" onclick="copyLink()">📋 复制链接</button>
     </div>
     <div id="legend">
-      <div class="lg-t">TRIP DATA · 10月1日</div>
+      <div class="lg-t">TRIP DATA · 10月23日</div>
       <div class="lg-r"><span class="lg-line" style="background:#4fc3f7;box-shadow:0 0 8px #4fc3f7"></span>驾车段</div>
-      <div class="lg-r"><span class="lg-line" style="background:#9b7bff;box-shadow:0 0 8px #9b7bff"></span>飞行段</div>
+      
       <div class="lg-r"><span class="lg-dot" style="background:#4fc3f7;box-shadow:0 0 8px #4fc3f7"></span>总里程<b id="lgDist">—</b></div>
       <div class="lg-r"><span class="lg-dot" style="background:#ff9f43;box-shadow:0 0 8px #ff9f43"></span>总耗时<b id="lgDur">—</b></div>
     </div>
   </div>
   <div id="panel">
     <div class="p-head">
-      <h1>10月1日 贵阳 → 苏州 行程演示</h1>
-      <div class="sub" id="pSub">10月1日（国庆）· 贵大西校区 → 贵阳龙洞堡机场 → 无锡硕放机场 → 吴越领秀（家）</div>
+      <h1>10月23日 常熟走访调研行程</h1>
+      <div class="sub" id="pSub">10月23日（周五）· 苏州分行 → 常熟市人民政府 → 常熟东南支行 → 斗山电子 → 苏州分行</div>
     </div>
     <div class="prog-wrap">
       <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
@@ -193,15 +193,16 @@
 <script>
 /* ================= 配置 ================= */
 /* 时间轴以 route_data.json 的 depart_time 为准；此处为兜底值 */
-const DEPART_MIN = 11 * 60 + 0;   // 11:00 从贵大西校区出发
+const DEPART_MIN = 8 * 60 + 30;   // 08:30 从苏州分行出发
 const DEFAULT_STAY = 0;           // 默认停留(分钟)
 
 /* 各点位停留时间（分钟）：抵达后停留多久再出发 */
 const STAY_OVERRIDE = {
-  '贵州大学西校区': 33,           // 11:00 出发 -> 11:33 到龙洞堡
-  '贵阳龙洞堡国际机场': 57,       // 11:33 到站 + 57min 办票安检 -> 12:30 起飞
-  '无锡硕放机场': 0,              // 14:30 落地 -> 立即出发（15:23 到家）
-  '吴越领秀(家)': 0
+  '苏州分行（旺墩路122号）': 0,
+  '常熟市人民政府': 50,
+  '常熟东南支行': 95,
+  '斗山电子（常熟）有限公司': 45,
+  '苏州分行（返程）': 0
 };
 
 let map, roadLayer, satLayer, routeLayers = [], comet = null;
